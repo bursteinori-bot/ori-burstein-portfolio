@@ -1,0 +1,24 @@
+[
+  {
+    "id": 1,
+    "slug": "hashmaim-karagah-kchulim",
+    "title": "השמיים כרגע כחולים",
+    "category": "סיפור קצר",
+    "tabLabel": "א׳",
+    "badge": "01",
+    "teaser": "נדמה לו שהוא יודע בדיוק מה היא חושבת, ולכן לא טורח לשאול. נדמה לה שהיא יודעת בדיוק מה הוא אומר, ולכן היא לא טורחת להקשיב.",
+    "cover": "freepik_a-breathtaking-ultrawide-_2763376983.png",
+    "file": "stories/hashmaim-karagah-kchulim.md"
+  },
+  {
+    "id": 2,
+    "slug": "olamot-nechravim",
+    "title": "עולמות נחרבים ונבנים ברגע זה ממש",
+    "category": "דיפטיך",
+    "tabLabel": "ב׳",
+    "badge": "02",
+    "teaser": "אני לוקח עוד לגימה. הוויסקי שורף, אבל זה בדיוק הגועל בגוף שרציתי להרגיש.",
+    "cover": "story2.png",
+    "file": "stories/olamot-nechravim.md"
+  }
+]

@@ -1241,86 +1241,7 @@
     >
   </div>
 
-  <div id="stories-gallery">
-
-    <!-- STORY 1 — dossier / folder style -->
-    <div class="story-file-wrapper" onclick="openStory(1)" data-category="סיפור קצר" data-title="השמיים כרגע כחולים">
-
-      <!-- Folder tab -->
-      <div class="story-folder-tab">
-        <span class="story-folder-tab-num">א׳</span>
-        <span class="story-folder-tab-sep"></span>
-        <span class="story-folder-tab-label">סיפור קצר</span>
-        <span class="story-folder-tab-arrow">›</span>
-      </div>
-
-      <!-- Stacked pages behind -->
-      <div class="story-page-back"></div>
-      <div class="story-page-back"></div>
-
-      <!-- Main card -->
-      <div class="gallery-card story-cover">
-        <img class="story-cover-img" src="freepik_a-breathtaking-ultrawide-_2763376983.png" alt="השמיים כרגע כחולים">
-        <div class="story-cover-overlay"></div>
-
-        <!-- top meta strip -->
-        <div class="story-cover-meta">
-          <span class="story-cover-badge">01</span>
-          <span class="story-cover-readtime-top" id="cover-readtime">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span id="cover-readtime-label">—</span>
-          </span>
-        </div>
-
-        <!-- bottom text -->
-        <div class="story-cover-body">
-          <h3 class="story-cover-title">השמיים כרגע כחולים</h3>
-          <p class="story-cover-author">אורי בורשטיין</p>
-          <div class="story-cover-divider"></div>
-          <p class="story-cover-teaser">נדמה לו שהוא יודע בדיוק מה היא חושבת, ולכן לא טורח לשאול. נדמה לה שהיא יודעת בדיוק מה הוא אומר, ולכן היא לא טורחת להקשיב.</p>
-        </div>
-
-        <span class="story-read-hint">קרא</span>
-      </div>
-    </div>
-
-    <!-- STORY 2 -->
-    <div class="story-file-wrapper" onclick="openStory(2)" data-category="דיפטיך" data-title="עולמות נחרבים ונבנים ברגע זה ממש">
-
-      <div class="story-folder-tab">
-        <span class="story-folder-tab-num">ב׳</span>
-        <span class="story-folder-tab-sep"></span>
-        <span class="story-folder-tab-label">דיפטיך</span>
-        <span class="story-folder-tab-arrow">›</span>
-      </div>
-
-      <div class="story-page-back"></div>
-      <div class="story-page-back"></div>
-
-      <div class="gallery-card story-cover">
-        <img class="story-cover-img" src="story2.png" alt="עולמות נחרבים ונבנים ברגע זה ממש">
-        <div class="story-cover-overlay"></div>
-
-        <div class="story-cover-meta">
-          <span class="story-cover-badge">02</span>
-          <span class="story-cover-readtime-top">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            <span id="cover-readtime-label-2">—</span>
-          </span>
-        </div>
-
-        <div class="story-cover-body">
-          <h3 class="story-cover-title">עולמות נחרבים ונבנים ברגע זה ממש</h3>
-          <p class="story-cover-author">אורי בורשטיין</p>
-          <div class="story-cover-divider"></div>
-          <p class="story-cover-teaser">אני לוקח עוד לגימה. הוויסקי שורף, אבל זה בדיוק הגועל בגוף שרציתי להרגיש.</p>
-        </div>
-
-        <span class="story-read-hint">קרא</span>
-      </div>
-    </div>
-
-  </div>
+  <div id="stories-gallery"></div>
 </section>
 
 <div class="section-divider"></div>
@@ -1377,7 +1298,7 @@
   </div>
 </div>
 
-<!-- ── STORY CONTENT TEMPLATES (hidden) ── -->
+<!-- ── STORY CONTENT TEMPLATES (hidden) ── removed, stories loaded from /stories/ ──
 <div style="display:none">
 
   <div id="story-body-1">
@@ -1414,8 +1335,7 @@
   </div>
 
 </div>
-
-</div>
+-- end removed section -->
 
 <script>
 // ─────────────────────────────────────────────
@@ -2130,74 +2050,149 @@ setTimeout(scheduleEffect, 1600);
 
 document.addEventListener('DOMContentLoaded', () => {
   loop().catch(err => console.error('Playback error:', err));
+  loadStories();
 });
 
 // ─────────────────────────────────────────────
-// STORY MODAL
+// STORY MODAL — loads from /stories/index.json + .md files
 // ─────────────────────────────────────────────
 const storyModal = document.getElementById('story-modal');
+let STORIES = [];
 
-const STORIES = {
-  1: {
-    title:   'השמיים כרגע כחולים',
-    author:  'אורי בורשטיין',
-    image:   'freepik_a-breathtaking-ultrawide-_2763376983.png',
-    bodyId:  'story-body-1',
-    coverId: 'cover-readtime-label'
-  },
-  2: {
-    title:   'עולמות נחרבים ונבנים ברגע זה ממש',
-    author:  'אורי בורשטיין',
-    image:   'story2.png',
-    bodyId:  'story-body-2',
-    coverId: 'cover-readtime-label-2'
-  },
-};
+// ── Minimal Markdown → HTML parser ──
+function mdToHtml(md) {
+  return md
+    .split(/\n\n+/)
+    .map(block => {
+      block = block.trim();
+      if (!block) return '';
+      // h4
+      if (block.startsWith('#### ')) return `<h4 class="story-section-heading">${esc(block.slice(5))}</h4>`;
+      // h3
+      if (block.startsWith('### '))  return `<h3 class="story-section-heading">${esc(block.slice(4))}</h3>`;
+      // paragraph — inline: *em*, **strong**
+      let p = esc(block)
+        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+        .replace(/\*(.+?)\*/g, '<em>$1</em>');
+      return `<p>${p}</p>`;
+    })
+    .join('\n');
+}
+function esc(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
 
-// Pre-calculate and display reading times on cover cards
-Object.values(STORIES).forEach(s => {
-  const tmpl  = document.getElementById(s.bodyId);
-  const words = tmpl ? (tmpl.innerText || tmpl.textContent).trim().split(/\s+/).length : 0;
-  const mins  = Math.ceil(words / 200);
-  const lbl   = document.getElementById(s.coverId);
-  if (lbl) lbl.textContent = `${mins} דק׳`;
-});
+// ── Build a gallery card from story metadata ──
+function buildCard(s, idx) {
+  const hebrewNums = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ז׳','ח׳','ט׳','י׳'];
+  const tabLabel = s.tabLabel || hebrewNums[idx] || String(idx + 1);
+  const badge    = s.badge    || String(idx + 1).padStart(2, '0');
 
-function openStory(id) {
-  const story  = STORIES[id];
-  const tmpl   = document.getElementById(story.bodyId);
-  const heroEl = document.getElementById('story-modal-hero');
-  const titleEl= document.getElementById('story-modal-title');
-  const bodyEl = document.getElementById('story-modal-body');
+  const el = document.createElement('div');
+  el.className = 'story-file-wrapper';
+  el.dataset.category = s.category || '';
+  el.dataset.title    = s.title    || '';
+  el.onclick = () => openStory(s.id);
+
+  el.innerHTML = `
+    <div class="story-folder-tab">
+      <span class="story-folder-tab-num">${tabLabel}</span>
+      <span class="story-folder-tab-sep"></span>
+      <span class="story-folder-tab-label">${s.category || ''}</span>
+      <span class="story-folder-tab-arrow">›</span>
+    </div>
+    <div class="story-page-back"></div>
+    <div class="story-page-back"></div>
+    <div class="gallery-card story-cover${s.cover ? '' : ' story-cover-no-img'}">
+      ${s.cover ? `<img class="story-cover-img" src="${s.cover}" alt="${s.title}">` : ''}
+      <div class="story-cover-overlay"></div>
+      <div class="story-cover-meta">
+        <span class="story-cover-badge">${badge}</span>
+        <span class="story-cover-readtime-top">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span class="story-readtime-label">—</span>
+        </span>
+      </div>
+      <div class="story-cover-body">
+        <h3 class="story-cover-title">${s.title}</h3>
+        <p class="story-cover-author">אורי בורשטיין</p>
+        <div class="story-cover-divider"></div>
+        <p class="story-cover-teaser">${s.teaser || ''}</p>
+      </div>
+      <span class="story-read-hint">קרא</span>
+    </div>`;
+  return el;
+}
+
+// ── Load stories/index.json and render gallery ──
+async function loadStories() {
+  try {
+    const res  = await fetch('stories/index.json');
+    STORIES    = await res.json();
+    const gallery = document.getElementById('stories-gallery');
+    gallery.innerHTML = '';
+
+    for (let i = 0; i < STORIES.length; i++) {
+      const s   = STORIES[i];
+      const card = buildCard(s, i);
+      gallery.appendChild(card);
+
+      // fetch word count for reading time badge
+      fetch(s.file)
+        .then(r => r.text())
+        .then(md => {
+          const words = md.trim().split(/\s+/).length;
+          const mins  = Math.ceil(words / 200);
+          const lbl   = card.querySelector('.story-readtime-label');
+          if (lbl) lbl.textContent = `${mins} דק׳`;
+        })
+        .catch(() => {});
+    }
+
+    applyFilter();
+  } catch(e) {
+    console.error('Failed to load stories:', e);
+  }
+}
+
+async function openStory(id) {
+  const story = STORIES.find(s => s.id === id);
+  if (!story) return;
+
+  const heroEl     = document.getElementById('story-modal-hero');
+  const titleEl    = document.getElementById('story-modal-title');
+  const bodyEl     = document.getElementById('story-modal-body');
   const byAuthorEl = document.querySelector('#story-modal-byline span');
   const authorLbl  = document.querySelector('.modal-author-label');
   const readLbl    = document.getElementById('story-read-time-label');
 
-  // populate title + author
   titleEl.textContent = story.title;
-  if (byAuthorEl)  byAuthorEl.textContent  = story.author;
-  if (authorLbl)   authorLbl.textContent   = story.author;
+  if (byAuthorEl) byAuthorEl.textContent = 'אורי בורשטיין';
+  if (authorLbl)  authorLbl.textContent  = 'אורי בורשטיין';
 
-  // hero image
-  if (story.image) {
-    heroEl.querySelector('img').src = story.image;
+  if (story.cover) {
+    heroEl.querySelector('img').src = story.cover;
     heroEl.style.display = '';
     storyModal.classList.remove('no-hero');
   } else {
     storyModal.classList.add('no-hero');
   }
 
-  // body content
-  bodyEl.innerHTML = tmpl ? tmpl.innerHTML : '';
-
-  // reading time
-  const words = bodyEl.innerText.trim().split(/\s+/).length;
-  const mins  = Math.ceil(words / 200);
-  if (readLbl) readLbl.textContent = `${mins} דקות קריאה`;
-
+  bodyEl.innerHTML = '<p style="opacity:0.4">טוען...</p>';
   storyModal.classList.add('open');
   document.body.style.overflow = 'hidden';
   document.getElementById('story-modal-scroll').scrollTop = 0;
+
+  try {
+    const md    = await (await fetch(story.file)).text();
+    const html  = mdToHtml(md);
+    bodyEl.innerHTML = html;
+    const words = md.trim().split(/\s+/).length;
+    const mins  = Math.ceil(words / 200);
+    if (readLbl) readLbl.textContent = `${mins} דקות קריאה`;
+  } catch(e) {
+    bodyEl.innerHTML = '<p>שגיאה בטעינת הסיפור.</p>';
+  }
 }
 function closeStory() {
   storyModal.classList.remove('open');
