@@ -6,14 +6,82 @@
   <title>אורי בורשטיין — סיפורים</title>
   <meta name="description" content="אורי בורשטיין — סיפורים קצרים, דיפטיכים וזיכרונות. תפסו כיסא, תצטרפו.">
   <meta name="author" content="אורי בורשטיין">
+  <meta name="robots" content="index, follow">
+  <meta name="keywords" content="אורי בורשטיין, סיפורים קצרים, פרוזה עברית, ספרות עברית, קריאה, כתיבה יוצרת">
+  <meta name="theme-color" content="#1a0f0a">
+
+  <!-- Open Graph -->
   <meta property="og:title" content="אורי בורשטיין — סיפורים">
   <meta property="og:description" content="סיפורים קצרים, דיפטיכים וזיכרונות. תפסו כיסא, תצטרפו.">
   <meta property="og:url" content="https://oriburstein.com">
   <meta property="og:type" content="website">
-  <link rel="canonical" href="https://oriburstein.com">
+  <meta property="og:image" content="https://oriburstein.com/freepik_a-breathtaking-ultrawide-_2763376983.jpg">
+  <meta property="og:image:width" content="1400">
+  <meta property="og:image:height" content="700">
+  <meta property="og:image:alt" content="אורי בורשטיין — סיפורים">
+  <meta property="og:locale" content="he_IL">
+  <meta property="og:site_name" content="אורי בורשטיין">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="אורי בורשטיין — סיפורים">
+  <meta name="twitter:description" content="סיפורים קצרים, דיפטיכים וזיכרונות. תפסו כיסא, תצטרפו.">
+  <meta name="twitter:image" content="https://oriburstein.com/freepik_a-breathtaking-ultrawide-_2763376983.jpg">
+
+  <link rel="canonical" href="https://oriburstein.com" id="canonical-link">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='50' fill='%23111'/><text y='.9em' x='50%' dominant-baseline='auto' text-anchor='middle' font-size='52' font-family='serif' fill='white' dy='0.1em'>OB</text></svg>">
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Caveat:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+
+  <!-- Structured Data -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "Person",
+        "@id": "https://oriburstein.com/#person",
+        "name": "אורי בורשטיין",
+        "url": "https://oriburstein.com",
+        "image": "https://oriburstein.com/70EBCC29-8198-4A1C-A04F-7E18E85DA6ED_4_5005_c.jpeg",
+        "sameAs": [
+          "https://www.instagram.com/ori.burstein/",
+          "https://www.linkedin.com/in/oriburstein"
+        ],
+        "jobTitle": "סופר",
+        "description": "סופר ויוצר תוכן. מהרצליה לירושלים וחזרה.",
+        "knowsLanguage": "he"
+      },
+      {
+        "@type": "WebSite",
+        "@id": "https://oriburstein.com/#website",
+        "url": "https://oriburstein.com",
+        "name": "אורי בורשטיין — סיפורים",
+        "description": "סיפורים קצרים, דיפטיכים וזיכרונות מאת אורי בורשטיין",
+        "author": { "@id": "https://oriburstein.com/#person" },
+        "inLanguage": "he",
+        "publisher": { "@id": "https://oriburstein.com/#person" }
+      },
+      {
+        "@type": "ShortStory",
+        "name": "השמיים כרגע כחולים",
+        "url": "https://oriburstein.com/#hashmaim-karagah-kchulim",
+        "author": { "@id": "https://oriburstein.com/#person" },
+        "inLanguage": "he",
+        "description": "נדמה לו שהוא יודע בדיוק מה היא חושבת, ולכן לא טורח לשאול. נדמה לה שהיא יודעת בדיוק מה הוא אומר, ולכן היא לא טורחת להקשיב."
+      },
+      {
+        "@type": "ShortStory",
+        "name": "עולמות נחרבים ונבנים ברגע זה ממש",
+        "url": "https://oriburstein.com/#olamot-nechravim",
+        "author": { "@id": "https://oriburstein.com/#person" },
+        "inLanguage": "he",
+        "description": "אני לוקח עוד לגימה. הוויסקי שורף, אבל זה בדיוק הגועל בגוף שרציתי להרגיש."
+      }
+    ]
+  }
+  </script>
   <style>
     @font-face {
       font-family: 'Yarden';
@@ -2275,6 +2343,21 @@ async function openStory(id) {
 
   bodyEl.innerHTML = '<p style="opacity:0.4">טוען...</p>';
   history.pushState({ storyId: id }, story.title, '#' + story.slug);
+
+  // Update meta tags for SEO / social sharing
+  const storyUrl = 'https://oriburstein.com/#' + story.slug;
+  const storyImg = story.cover ? 'https://oriburstein.com/' + story.cover : 'https://oriburstein.com/freepik_a-breathtaking-ultrawide-_2763376983.jpg';
+  document.title = story.title + ' — אורי בורשטיין';
+  document.querySelector('meta[name="description"]').content = story.teaser;
+  document.querySelector('meta[property="og:title"]').content = story.title + ' — אורי בורשטיין';
+  document.querySelector('meta[property="og:description"]').content = story.teaser;
+  document.querySelector('meta[property="og:url"]').content = storyUrl;
+  document.querySelector('meta[property="og:image"]').content = storyImg;
+  document.querySelector('meta[name="twitter:title"]').content = story.title + ' — אורי בורשטיין';
+  document.querySelector('meta[name="twitter:description"]').content = story.teaser;
+  document.querySelector('meta[name="twitter:image"]').content = storyImg;
+  document.getElementById('canonical-link').href = storyUrl;
+
   storyModal.classList.add('open');
   document.body.style.overflow = 'hidden';
   document.getElementById('story-modal-scroll').scrollTop = 0;
@@ -2294,6 +2377,18 @@ function closeStory() {
   storyModal.classList.remove('open');
   document.body.style.overflow = '';
   history.pushState('', document.title, location.pathname);
+
+  // Restore default meta tags
+  document.title = 'אורי בורשטיין — סיפורים';
+  document.querySelector('meta[name="description"]').content = 'אורי בורשטיין — סיפורים קצרים, דיפטיכים וזיכרונות. תפסו כיסא, תצטרפו.';
+  document.querySelector('meta[property="og:title"]').content = 'אורי בורשטיין — סיפורים';
+  document.querySelector('meta[property="og:description"]').content = 'סיפורים קצרים, דיפטיכים וזיכרונות. תפסו כיסא, תצטרפו.';
+  document.querySelector('meta[property="og:url"]').content = 'https://oriburstein.com';
+  document.querySelector('meta[property="og:image"]').content = 'https://oriburstein.com/freepik_a-breathtaking-ultrawide-_2763376983.jpg';
+  document.querySelector('meta[name="twitter:title"]').content = 'אורי בורשטיין — סיפורים';
+  document.querySelector('meta[name="twitter:description"]').content = 'סיפורים קצרים, דיפטיכים וזיכרונות. תפסו כיסא, תצטרפו.';
+  document.querySelector('meta[name="twitter:image"]').content = 'https://oriburstein.com/freepik_a-breathtaking-ultrawide-_2763376983.jpg';
+  document.getElementById('canonical-link').href = 'https://oriburstein.com';
 }
 
 let storyLightMode = false;
