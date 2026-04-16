@@ -1497,11 +1497,16 @@ document.querySelectorAll('a, #scroll-arrow').forEach(el => {
 });
 
 // ─────────────────────────────────────────────
-// INTRO FADE
+// INTRO FADE — removed after first video starts playing
 // ─────────────────────────────────────────────
-window.addEventListener('load', () => {
-  setTimeout(() => document.getElementById('intro-fade').classList.add('out'), 200);
-});
+let introFadeDone = false;
+function dismissIntroFade() {
+  if (introFadeDone) return;
+  introFadeDone = true;
+  document.getElementById('intro-fade').classList.add('out');
+}
+// Fallback: dismiss after 6s max even if video never plays (e.g. blocked by browser)
+window.addEventListener('load', () => setTimeout(dismissIntroFade, 6000));
 
 // ─────────────────────────────────────────────
 // STATE
@@ -1557,6 +1562,9 @@ function sleep(ms) {
   });
 }
 
+const isMobileDevice = /Mobi|Android/i.test(navigator.userAgent);
+const PRELOAD_TIMEOUT = isMobileDevice ? 12000 : 3000;
+
 // Begin loading idx into standby element (non-blocking)
 function beginPreload(idx) {
   preloadedIdx = idx;
@@ -1567,36 +1575,44 @@ function beginPreload(idx) {
       if (settled) return;
       settled = true;
       el.removeEventListener('canplay', done);
+      el.removeEventListener('canplaythrough', done);
       el.removeEventListener('error', done);
       resolve();
     };
     el.src = VIDEO_DIR + VIDEOS[idx];
-    el.addEventListener('canplay', done);
+    // On mobile prefer canplaythrough for smoother playback; desktop canplay is enough
+    el.addEventListener(isMobileDevice ? 'canplaythrough' : 'canplay', done);
     el.addEventListener('error', done);
     el.load();
-    setTimeout(done, 3000); // local server should load in ms, 3s is generous
+    setTimeout(done, PRELOAD_TIMEOUT);
   });
   return preloadPromise;
 }
 
-function swap() {
+async function playEl(el) {
+  try {
+    await el.play();
+  } catch {
+    el.load();
+    await new Promise(r => setTimeout(r, 150));
+    try { await el.play(); } catch { /* blocked by browser policy */ }
+  }
+}
+
+async function swap() {
   const incoming = standby;
   const outgoing = current;
 
-  // Incoming rises above outgoing — fades in OVER a still-visible video (no bg bleed)
   incoming.style.zIndex = '2';
   outgoing.style.zIndex = '1';
-  incoming.classList.add('active');
 
-  incoming.play().catch(() => {
-    incoming.load();
-    setTimeout(() => incoming.play().catch(() => {}), 60);
-  });
+  // Start playing before fade-in so there's a live frame, not a black/still one
+  await playEl(incoming);
+  dismissIntroFade(); // first video is playing — remove the intro overlay
+  incoming.classList.add('active');
 
   [current, standby] = [standby, current];
 
-  // After fade-in, hide outgoing — but ONLY if it's still the standby.
-  // If a newer swap has already claimed it as current, leave it alone.
   setTimeout(() => {
     if (outgoing === standby) {
       outgoing.style.transition = 'none';
