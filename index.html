@@ -363,7 +363,7 @@
     /* ── ABOUT ── */
     #about-grid {
       display: grid;
-      grid-template-columns: 280px 1fr;
+      grid-template-columns: 1fr 260px;
       gap: 72px;
       align-items: start;
     }
@@ -378,22 +378,35 @@
       display: block;
     }
 
+    #about-text-wrap {
+      position: relative;
+    }
+
     #about-statement {
       font-family: 'Cormorant Garamond', serif;
       font-size: clamp(1.3rem, 2.2vw, 1.75rem);
       font-weight: 300;
       line-height: 1.7;
       color: var(--cream);
-      margin-bottom: 36px;
+      margin-bottom: 28px;
       font-style: italic;
     }
 
     #about-bio {
-      font-family: 'Noto Serif Hebrew', serif;
-      font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      line-height: 2;
+      color: var(--muted);
+      margin-bottom: 28px;
+    }
+
+    #about-mid {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1rem, 1.5vw, 1.15rem);
       line-height: 2;
       color: var(--muted);
       margin-bottom: 44px;
+      position: relative;
     }
 
     #about-closing {
@@ -405,6 +418,62 @@
       padding-top: 32px;
       border-top: 1px solid var(--line);
     }
+
+    /* ── Draft / manuscript marks ── */
+    .draft-highlight {
+      background: linear-gradient(120deg, rgba(255,210,40,0.38) 0%, rgba(255,210,40,0.22) 100%);
+      border-radius: 2px;
+      padding: 0 3px;
+    }
+
+    .draft-del {
+      text-decoration: line-through;
+      text-decoration-color: #c0392b;
+      text-decoration-thickness: 2px;
+      opacity: 0.55;
+    }
+
+    .draft-circle {
+      border: 1.5px solid #c0392b;
+      border-radius: 50px;
+      padding: 0px 6px;
+      color: #c0392b;
+      white-space: nowrap;
+    }
+
+    .draft-wavy {
+      text-decoration: underline wavy #c0392b;
+      text-underline-offset: 3px;
+    }
+
+    .draft-note {
+      position: absolute;
+      right: -9rem;
+      top: 0.2em;
+      font-family: 'Caveat', cursive;
+      font-size: 0.82rem;
+      color: #c0392b;
+      white-space: nowrap;
+      transform: rotate(1.5deg);
+      line-height: 1.4;
+      pointer-events: none;
+    }
+    .draft-note::before {
+      content: '← ';
+      font-size: 0.75rem;
+    }
+
+    .draft-cursor {
+      display: inline-block;
+      width: 2px;
+      height: 1.1em;
+      background: var(--cream);
+      vertical-align: text-bottom;
+      margin-right: 2px;
+      animation: cur-blink 1.1s step-end infinite;
+      opacity: 0.7;
+    }
+    @keyframes cur-blink { 0%,100%{opacity:0.7} 50%{opacity:0} }
 
     @media (max-width: 700px) {
       #about-grid {
@@ -1252,12 +1321,14 @@
 <section class="section" dir="rtl">
   <div class="section-label">אודות</div>
   <div id="about-grid">
-    <img id="about-photo" src="70EBCC29-8198-4A1C-A04F-7E18E85DA6ED_4_5005_c.jpeg" alt="Ori Burstein">
-    <div>
-      <p id="about-statement">מהרצליה לים המלח לירושלים וחזרה. מלימודי תסריטאות לכתיבת קוד – מהמילה שמחפשת סאבטקסט לשורה שמחפשת לוגיקה. מהסצנה שלא נגמרת לבאג שלא משחרר.</p>
-      <p id="about-bio">בתוך כל התנועה הזאת, אני מוצא את עצמי מזגזג: בין הדמויות שחלמתי לברוא לאנשים שחלמתי להיות, ובין אלה שכל כך פחדתי להפוך אליהם. ובין כל המילים, השורות והזהויות – הכיסא תמיד נשאר אותו כיסא.</p>
-      <p id="about-closing">זה המקום שלי להניח את הראש ולנוח רגע.<br>תפסו כיסא, תצטרפו.</p>
+    <div id="about-text-wrap">
+      <p id="about-statement">מהרצליה <del class="draft-del">לים המלח</del> לירושלים וחזרה. מלימודי <span class="draft-circle">תסריטאות</span> לכתיבת קוד – <span class="draft-highlight">מהמילה שמחפשת סאבטקסט לשורה שמחפשת לוגיקה.</span> מהסצנה שלא נגמרת לבאג שלא משחרר.</p>
+      <p id="about-mid">בתוך כל התנועה הזאת, אני מוצא את עצמי מזגזג: בין הדמויות שחלמתי לברוא לאנשים שחלמתי להיות, ובין אלה שכל כך פחדתי להפוך אליהם. ובין כל המילים, השורות והזהויות – <span class="draft-wavy">הכיסא תמיד נשאר אותו כיסא.</span>
+        <span class="draft-note">לבדוק ניסוח</span>
+      </p>
+      <p id="about-closing">זה המקום שלי להניח את הראש ולנוח רגע.<br>תפסו כיסא, תצטרפו.<span class="draft-cursor"></span></p>
     </div>
+    <img id="about-photo" src="70EBCC29-8198-4A1C-A04F-7E18E85DA6ED_4_5005_c.jpeg" alt="Ori Burstein">
   </div>
 </section>
 
