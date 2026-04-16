@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="he">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ori Burstein</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='50' fill='%23111'/><text y='.9em' x='50%' dominant-baseline='auto' text-anchor='middle' font-size='52' font-family='serif' fill='white' dy='0.1em'>OB</text></svg>">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=Caveat:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+  <style>
+    @font-face {
+      font-family: 'Yarden';
+      src: url('YardenAlefAlefAlef/web/yarden-regular-alefalefalef.woff2') format('woff2'),
+           url('YardenAlefAlefAlef/web/yarden-regular-alefalefalef.woff') format('woff');
+      font-weight: 400;
+      font-style: normal;
+      font-display: swap;
+    }
+    @font-face {
+      font-family: 'Yarden';
+      src: url('YardenAlefAlefAlef/web/yarden-bold-alefalefalef.woff2') format('woff2'),
+           url('YardenAlefAlefAlef/web/yarden-bold-alefalefalef.woff') format('woff');
+      font-weight: 700;
+      font-style: normal;
+      font-display: swap;
+    }
+  </style>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:      #0d0b08;
+      --cream:   rgba(238, 228, 210, 0.92);
+      --muted:   rgba(200, 185, 160, 0.45);
+      --faint:   rgba(200, 185, 160, 0.18);
+      --line:    rgba(200, 185, 160, 0.12);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: 'Inter', sans-serif;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* Film grain */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: -50%;
+      width: 200%;
+      height: 200%;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.072;
+      pointer-events: none;
+      z-index: 500;
+    }
+
+    /* ── INTRO FADE ── */
+    #intro-fade {
+      position: fixed;
+      inset: 0;
+      background: #000;
+      z-index: 200;
+      pointer-events: none;
+      opacity: 1;
+      transition: opacity 1.4s ease;
+    }
+    #intro-fade.out { opacity: 0; }
+
+    /* ── CUSTOM CURSOR ── */
+    #cursor {
+      position: fixed;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.9);
+      pointer-events: none;
+      z-index: 999;
+      transform: translate(-50%, -50%);
+      transition: transform 0.12s ease, opacity 0.2s ease, width 0.2s ease, height 0.2s ease;
+      mix-blend-mode: difference;
+    }
+    #cursor.big {
+      width: 36px;
+      height: 36px;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.6);
+    }
+    @media (hover: none) {
+      body { cursor: auto; }
+      #cursor { display: none; }
+    }
+
+    /* ── HERO VIDEO ── */
+    #hero {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      height: 100vh;
+      overflow: hidden;
+      background: #0d0b08;
+      z-index: 100;
+    }
+
+    #hero-push {
+      height: 100vh;
+      pointer-events: none;
+    }
+
+
+    #hero video {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ── VINTAGE FILM LOOK — preserves original colours ── */
+    /* Slightly faded contrast + lift only — no colour shift */
+    #vid-a, #vid-b {
+      opacity: 0;
+      filter: contrast(0.90) saturate(0.88) brightness(1.04);
+    }
+    #vid-a.active, #vid-b.active { opacity: 1; transition: opacity 0.55s ease; }
+
+    /* Thin dark base */
+    #overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10, 7, 4, 0.20);
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    /* ── VINTAGE OVERLAY ── */
+    #vintage-overlay {
+      position: absolute;
+      inset: 0;
+      z-index: 6;
+      pointer-events: none;
+    }
+    /* Neutral lens vignette — no colour tint, just optical darkening at edges */
+    #vintage-overlay::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse 66% 62% at 50% 50%,
+        transparent 0%,
+        transparent 30%,
+        rgba(0, 0, 0, 0.20) 65%,
+        rgba(0, 0, 0, 0.52) 100%
+      );
+    }
+    /* Halation — very soft white bloom in the centre, screen blend only */
+    #vintage-overlay::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(
+        ellipse 52% 48% at 50% 50%,
+        rgba(255, 255, 255, 0.06) 0%,
+        transparent 60%
+      );
+      mix-blend-mode: screen;
+    }
+    /* Lifted blacks — screen blend with near-black lifts shadows without adding colour */
+    #film-burn {
+      position: absolute;
+      inset: 0;
+      z-index: 7;
+      pointer-events: none;
+      background: rgba(28, 24, 20, 0.18);
+      mix-blend-mode: screen;
+    }
+    /* Scanlines — barely visible */
+    #scanlines {
+      position: absolute;
+      inset: 0;
+      z-index: 8;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 3px,
+        rgba(0, 0, 0, 0.035) 3px,
+        rgba(0, 0, 0, 0.035) 4px
+      );
+    }
+    #flash {
+      position: absolute;
+      inset: 0;
+      background: #fff;
+      opacity: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    /* ── BRANDING — centered, horizontal row: social LEFT | name RIGHT ── */
+    #branding {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      z-index: 15;
+      display: flex;
+      flex-direction: row-reverse; /* name=right, social=left */
+      align-items: center;
+      gap: 36px;
+      pointer-events: none;
+      white-space: nowrap;
+    }
+
+    #branding-text {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 14px;
+    }
+
+    #branding-text h2 {
+      font-family: 'Yarden', serif;
+      font-size: clamp(2rem, 4.5vw, 3.4rem);
+      font-weight: 400;
+      letter-spacing: 0.06em;
+      direction: rtl;
+      color: var(--cream);
+      margin: 0;
+      text-shadow: 0 2px 40px rgba(0,0,0,0.7), 0 0 80px rgba(0,0,0,0.4);
+    }
+
+    .tagline-text {
+      font-family: 'Caveat', cursive;
+      font-size: clamp(1rem, 1.6vw, 1.25rem);
+      font-weight: 400;
+      letter-spacing: 0.02em;
+      color: rgba(238, 228, 210, 0.6);
+      margin: 0;
+    }
+
+    #branding-line {
+      width: 1px;
+      height: 36px;
+      background: rgba(255,255,255,0.3);
+      transform-origin: center center;
+    }
+
+    /* Scroll animation compositing hints */
+    #branding-text { will-change: transform; }
+    #branding-text h2 { will-change: transform; transform-origin: center center; }
+    #social { will-change: transform; transform-origin: left center; }
+
+    #social {
+      display: flex;
+      gap: 18px;
+      pointer-events: all;
+      align-items: center;
+    }
+
+    #social a {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid rgba(255,255,255,0.35);
+      border-radius: 50%;
+      color: rgba(255,255,255,0.75);
+      transition: border-color 0.25s, color 0.25s, background 0.25s;
+      text-decoration: none;
+      backdrop-filter: blur(4px);
+    }
+    #social a:hover {
+      border-color: rgba(255,255,255,0.9);
+      color: #fff;
+      background: rgba(255,255,255,0.1);
+    }
+    #social svg {
+      width: 15px;
+      height: 15px;
+      fill: currentColor;
+    }
+
+    /* ── LIGHT EFFECTS CANVAS ── */
+    #light-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 9;
+      mix-blend-mode: screen;
+    }
+
+    /* ── VIDEO COUNTER ── */
+    #vid-counter {
+      position: absolute;
+      top: 22px;
+      left: 28px;
+      z-index: 15;
+      pointer-events: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.18em;
+      color: rgba(238, 228, 210, 0.45);
+      line-height: 1;
+      transition: opacity 0.3s ease;
+    }
+    #vid-sep { margin: 0 1px; opacity: 0.6; }
+
+    /* ── SCROLL ARROW ── */
+    #scroll-arrow {
+      position: absolute;
+      bottom: 28px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 15;
+      cursor: none;
+      opacity: 0.55;
+      transition: opacity 0.2s;
+      animation: bounce 2.2s ease-in-out infinite;
+    }
+    #scroll-arrow:hover { opacity: 1; }
+    #scroll-arrow svg {
+      width: 22px;
+      height: 22px;
+      stroke: #fff;
+      fill: none;
+      stroke-width: 1.5;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+    @keyframes bounce {
+      0%, 100% { transform: translateX(-50%) translateY(0); }
+      50%       { transform: translateX(-50%) translateY(7px); }
+    }
+
+    /* ── SECTIONS ── */
+    .section {
+      padding: 110px 60px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .section-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin-bottom: 64px;
+    }
+
+    /* ── ABOUT ── */
+    #about-grid {
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 72px;
+      align-items: start;
+    }
+
+    #about-photo {
+      width: 100%;
+      aspect-ratio: 3/4;
+      object-fit: cover;
+      object-position: center top;
+      filter: grayscale(100%) contrast(1.05);
+      opacity: 0.82;
+      display: block;
+    }
+
+    #about-statement {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.3rem, 2.2vw, 1.75rem);
+      font-weight: 300;
+      line-height: 1.7;
+      color: var(--cream);
+      margin-bottom: 36px;
+      font-style: italic;
+    }
+
+    #about-bio {
+      font-family: 'Noto Serif Hebrew', serif;
+      font-size: clamp(0.95rem, 1.4vw, 1.05rem);
+      line-height: 2;
+      color: var(--muted);
+      margin-bottom: 44px;
+    }
+
+    #about-closing {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.1rem, 1.7vw, 1.35rem);
+      font-weight: 300;
+      line-height: 1.8;
+      color: rgba(238, 228, 210, 0.55);
+      padding-top: 32px;
+      border-top: 1px solid var(--line);
+    }
+
+    @media (max-width: 700px) {
+      #about-grid {
+        grid-template-columns: 1fr;
+        gap: 40px;
+      }
+      #about-photo {
+        aspect-ratio: 1/1;
+        max-width: 240px;
+      }
+    }
+
+    /* ── STORIES GALLERY ── */
+    #stories-gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      gap: 42px 28px;
+      padding: 20px 0 48px;
+    }
+
+    /* ── FILTER BAR ── */
+    #stories-filter {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+      align-items: center;
+      margin-bottom: 36px;
+      direction: rtl;
+    }
+    .filter-btn {
+      font-family: 'Yarden', serif;
+      font-size: 0.72rem;
+      color: rgba(200,185,160,0.42);
+      background: transparent;
+      border: 1px solid rgba(200,185,160,0.14);
+      border-radius: 2px;
+      padding: 5px 13px;
+      cursor: pointer;
+      transition: color 0.22s, border-color 0.22s, background 0.22s;
+      white-space: nowrap;
+      letter-spacing: 0.03em;
+      position: relative;
+    }
+    .filter-btn:hover {
+      color: rgba(200,185,160,0.75);
+      border-color: rgba(200,185,160,0.3);
+    }
+    .filter-btn.active {
+      color: rgba(238,228,210,0.92);
+      border-color: rgba(200,185,160,0.45);
+      background: rgba(200,185,160,0.07);
+    }
+    /* search button — slightly rounder */
+    .filter-btn.filter-search {
+      border-radius: 20px;
+      border-style: dashed;
+      border-color: rgba(200,185,160,0.18);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-right: auto; /* push to left edge in RTL */
+    }
+    .filter-btn.filter-search svg {
+      width: 11px; height: 11px;
+      stroke: currentColor; fill: none; stroke-width: 1.8;
+    }
+    /* separator dot */
+    .filter-sep {
+      width: 3px; height: 3px;
+      border-radius: 50%;
+      background: rgba(200,185,160,0.18);
+      flex-shrink: 0;
+    }
+    /* hidden story */
+    .story-file-wrapper.filtered-out {
+      display: none;
+    }
+
+    /* ── STORY FILE / FOLDER ── */
+    .story-file-wrapper {
+      position: relative;
+      width: 100%;
+      margin-top: 30px;
+      cursor: pointer;
+    }
+
+    /* ── Folder tab ── */
+    .story-folder-tab {
+      position: absolute;
+      top: -26px;
+      right: 18px;
+      height: 28px;
+      padding: 0 14px 0 12px;
+      background: #221808;
+      border: 1px solid rgba(200,185,160,0.14);
+      border-bottom: none;
+      clip-path: polygon(8px 0%, 100% 0%, 100% 100%, 0% 100%);
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      z-index: 5;
+      transition: background 0.3s, border-color 0.3s;
+      min-width: 0;
+    }
+    .story-file-wrapper:hover .story-folder-tab {
+      background: #2a1c0a;
+      border-color: rgba(200,185,160,0.26);
+    }
+    .story-folder-tab-num {
+      font-family: 'Yarden', serif;
+      font-size: 0.62rem;
+      color: rgba(200,185,160,0.32);
+      flex-shrink: 0;
+      padding-left: 6px;
+    }
+    .story-folder-tab-sep {
+      width: 1px;
+      height: 9px;
+      background: rgba(200,185,160,0.14);
+      flex-shrink: 0;
+    }
+    .story-folder-tab-label {
+      font-family: 'Yarden', serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.04em;
+      color: rgba(200,185,160,0.4);
+      white-space: nowrap;
+    }
+    .story-folder-tab-arrow {
+      margin-left: 2px;
+      font-size: 0.6rem;
+      color: rgba(200,185,160,0.18);
+      transition: color 0.3s, transform 0.3s;
+    }
+    .story-file-wrapper:hover .story-folder-tab-arrow {
+      color: rgba(200,185,160,0.55);
+      transform: translateX(2px);
+    }
+
+    /* ── Stacked pages ── */
+    .story-page-back {
+      position: absolute;
+      border-radius: 2px;
+      pointer-events: none;
+      background-image: repeating-linear-gradient(
+        to bottom,
+        transparent, transparent 18px,
+        rgba(200,185,160,0.035) 18px, rgba(200,185,160,0.035) 19px
+      );
+      transition: transform 0.45s cubic-bezier(0.34,1.1,0.64,1);
+    }
+    .story-page-back:nth-child(2) {
+      inset: 3px;
+      background-color: #1c1508;
+      border: 1px solid rgba(200,185,160,0.08);
+      transform: rotate(-2.4deg) translateY(8px) translateX(-4px);
+      z-index: 0;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+    }
+    .story-page-back:nth-child(3) {
+      inset: 3px;
+      background-color: #201b0e;
+      border: 1px solid rgba(200,185,160,0.06);
+      transform: rotate(1.6deg) translateY(6px) translateX(4px);
+      z-index: 1;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
+    }
+    .story-file-wrapper:hover .story-page-back:nth-child(2) {
+      transform: rotate(-4deg) translateY(13px) translateX(-7px);
+    }
+    .story-file-wrapper:hover .story-page-back:nth-child(3) {
+      transform: rotate(2.6deg) translateY(10px) translateX(7px);
+    }
+
+    /* ── Main card ── */
+    .gallery-card.story-cover {
+      padding: 0;
+      height: 300px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+      border-radius: 2px;
+      border: 1px solid rgba(200,185,160,0.11);
+      z-index: 3;
+      transition: transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94),
+                  box-shadow 0.45s ease, border-color 0.45s ease;
+      box-shadow: 0 6px 28px rgba(0,0,0,0.55);
+    }
+    .gallery-card.story-cover::after { display: none; }
+    .story-file-wrapper:hover .gallery-card.story-cover {
+      transform: translateY(-5px);
+      border-color: rgba(200,185,160,0.22);
+      box-shadow: 0 14px 44px rgba(0,0,0,0.65),
+                  0 0 0 1px rgba(180,130,50,0.1),
+                  inset 0 1px 0 rgba(255,220,120,0.05);
+    }
+
+    .story-cover-img {
+      position: absolute;
+      inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+      filter: grayscale(12%) brightness(0.85) contrast(1.02);
+      transform: scale(1.03);
+      transition: transform 0.8s cubic-bezier(0.25,0.46,0.45,0.94), filter 0.8s ease;
+    }
+    .story-file-wrapper:hover .story-cover-img {
+      transform: scale(1.08);
+      filter: grayscale(5%) brightness(0.92) contrast(1.01);
+    }
+
+    .story-cover-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to top,
+        rgba(10,8,5,0.88) 0%,
+        rgba(10,8,5,0.42) 38%,
+        rgba(10,8,5,0.04) 62%,
+        transparent 100%
+      );
+      pointer-events: none;
+    }
+
+    /* number badge — top left */
+    .story-cover-meta {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      padding: 14px 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+    .story-cover-badge {
+      font-family: 'Yarden', serif;
+      font-size: 1.9rem;
+      font-weight: 400;
+      color: rgba(200,185,160,0.1);
+      line-height: 1;
+      user-select: none;
+      transition: color 0.4s;
+    }
+    .story-file-wrapper:hover .story-cover-badge { color: rgba(200,185,160,0.2); }
+
+    .story-cover-readtime-top {
+      font-family: 'Yarden', serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.03em;
+      color: rgba(200,185,160,0.28);
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      background: rgba(10,8,5,0.42);
+      padding: 3px 7px;
+      border-radius: 2px;
+      border: 1px solid rgba(200,185,160,0.09);
+      backdrop-filter: blur(4px);
+      transition: color 0.3s;
+    }
+    .story-cover-readtime-top svg { width: 8px; height: 8px; stroke: currentColor; fill: none; stroke-width: 1.5; }
+    .story-file-wrapper:hover .story-cover-readtime-top { color: rgba(200,185,160,0.5); }
+
+    /* bottom text */
+    .story-cover-body {
+      position: absolute;
+      bottom: 0; right: 0; left: 0;
+      padding: 18px 20px 20px;
+      text-align: right;
+    }
+    .story-cover-num { display: none; }
+    .story-cover-title {
+      font-family: 'Yarden', serif;
+      font-size: clamp(1.05rem, 1.8vw, 1.28rem);
+      font-weight: 400;
+      color: rgba(238,228,210,0.95);
+      line-height: 1.3;
+      margin-bottom: 5px;
+    }
+    .story-cover-author {
+      font-family: 'Yarden', serif;
+      font-size: 0.62rem;
+      color: rgba(200,185,160,0.38);
+      margin-bottom: 0;
+    }
+    .story-cover-divider {
+      width: 20px; height: 1px;
+      background: rgba(200,185,160,0.18);
+      margin: 10px 0 10px auto;
+      transition: width 0.35s, background 0.35s;
+    }
+    .story-file-wrapper:hover .story-cover-divider {
+      width: 36px;
+      background: rgba(200,185,160,0.35);
+    }
+    .story-cover-teaser {
+      font-family: 'Yarden', serif;
+      font-size: 0.7rem;
+      line-height: 1.8;
+      color: rgba(200,185,160,0.42);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      transition: color 0.35s;
+    }
+    .story-file-wrapper:hover .story-cover-teaser { color: rgba(200,185,160,0.58); }
+
+    /* read CTA */
+    .story-read-hint {
+      position: absolute;
+      bottom: 20px; left: 20px;
+      font-family: 'Yarden', serif;
+      font-size: 0.62rem;
+      color: rgba(200,185,160,0.2);
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: color 0.3s, gap 0.3s;
+    }
+    .story-read-hint::after {
+      content: '→';
+      font-size: 0.65rem;
+      transition: transform 0.3s;
+      display: inline-block;
+    }
+    .story-file-wrapper:hover .story-read-hint { color: rgba(200,185,160,0.65); gap: 8px; }
+    .story-file-wrapper:hover .story-read-hint::after { transform: translateX(3px); }
+
+    /* ── TEXT-ONLY CARD (no image) ── */
+    .gallery-card.story-cover-text {
+      background: #0f0c08;
+    }
+    .story-cover-text-glow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 100% 55% at 50% 100%, rgba(72,38,10,0.45) 0%, transparent 65%),
+        radial-gradient(ellipse 50% 40% at 85% 15%,  rgba(48,24,6,0.22)  0%, transparent 55%);
+    }
+    .story-cover-text-lines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent,
+        transparent 28px,
+        rgba(200,185,160,0.025) 28px,
+        rgba(200,185,160,0.025) 29px
+      );
+    }
+
+    /* ── TECH / DATA CARD ── */
+    .gallery-card.story-cover-data {
+      background: #070b12;
+    }
+    .story-cover-data-glow {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 90% 50% at 50% 100%, rgba(0,90,200,0.13) 0%, transparent 65%),
+        radial-gradient(ellipse 40% 35% at 15% 20%,  rgba(0,55,140,0.08) 0%, transparent 55%);
+    }
+    .story-cover-data-lines {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        to bottom,
+        transparent, transparent 18px,
+        rgba(60,120,255,0.018) 18px, rgba(60,120,255,0.018) 19px
+      );
+    }
+    /* data-icon: tiny pie chart SVG in corner */
+    .story-cover-data-icon {
+      position: absolute;
+      top: 14px;
+      left: 16px;
+      width: 18px;
+      height: 18px;
+      opacity: 0.18;
+      transition: opacity 0.3s;
+    }
+    .story-file-wrapper:hover .story-cover-data-icon { opacity: 0.38; }
+
+    /* modal: no-hero state */
+    #story-modal.no-hero #story-modal-hero { display: none; }
+    #story-modal.no-hero #story-modal-title { margin-top: 60px; }
+
+    /* modal: section headers for multi-part stories */
+    .story-section-heading {
+      font-family: 'Yarden', serif;
+      font-size: 0.82rem;
+      letter-spacing: 0.08em;
+      color: rgba(200,185,160,0.38);
+      margin-top: 3.5em;
+      margin-bottom: 1.2em;
+      padding-bottom: 10px;
+      border-bottom: 1px solid rgba(200,185,160,0.1);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .story-section-heading::before {
+      content: '';
+      display: inline-block;
+      width: 18px;
+      height: 1px;
+      background: rgba(200,185,160,0.25);
+      flex-shrink: 0;
+    }
+    #story-modal.light-mode .story-section-heading {
+      color: rgba(50,30,10,0.45);
+      border-bottom-color: rgba(50,30,10,0.12);
+    }
+    #story-modal.light-mode .story-section-heading::before {
+      background: rgba(50,30,10,0.2);
+    }
+
+
+    /* ── STORY MODAL ── */
+    #story-modal {
+      position: fixed;
+      inset: 0;
+      z-index: 300;
+      background: #0d0b08;
+      display: flex;
+      flex-direction: column;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.5s ease;
+      overflow: hidden;
+    }
+    #story-modal.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    #story-modal-header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 10;
+      padding: 28px 52px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: linear-gradient(to bottom, rgba(13,11,8,0.95) 60%, transparent);
+    }
+    #story-modal-close {
+      background: none;
+      border: none;
+      color: rgba(200,185,160,0.45);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.25s, background 0.25s;
+    }
+    #story-modal-close svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+    #story-modal-close:hover { color: var(--cream); background: rgba(200,185,160,0.08); }
+    #story-modal-scroll {
+      flex: 1;
+      overflow-y: auto;
+      scroll-behavior: smooth;
+    }
+    #story-modal-scroll::-webkit-scrollbar { width: 4px; }
+    #story-modal-scroll::-webkit-scrollbar-track { background: transparent; }
+    #story-modal-scroll::-webkit-scrollbar-thumb { background: rgba(200,185,160,0.18); border-radius: 2px; }
+    #story-modal-hero {
+      width: 100%;
+      height: min(480px, 50vw);
+      overflow: hidden;
+      position: relative;
+    }
+    #story-modal-hero img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center 30%;
+      filter: grayscale(10%) brightness(0.82);
+    }
+    #story-modal-hero-grad {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(to bottom,
+        transparent 40%,
+        rgba(13,11,8,0.85) 80%,
+        #0d0b08 100%
+      );
+    }
+    #story-modal-content {
+      max-width: 680px;
+      margin: 0 auto;
+      padding: 0 40px 120px;
+      text-align: right;
+      direction: rtl;
+    }
+    #story-modal-title {
+      font-family: 'Yarden', serif;
+      font-size: clamp(1.9rem, 3.8vw, 3.2rem);
+      font-weight: 400;
+      color: var(--cream);
+      line-height: 1.1;
+      margin-bottom: 12px;
+      margin-top: -32px;
+      position: relative;
+      z-index: 2;
+    }
+    #story-modal-byline {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.14em;
+      color: rgba(200,185,160,0.4);
+      text-transform: uppercase;
+      margin-bottom: 64px;
+      padding-bottom: 40px;
+      border-bottom: 1px solid rgba(200,185,160,0.1);
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      flex-wrap: wrap;
+    }
+    #story-read-time {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(200,185,160,0.28);
+      font-size: 0.72rem;
+      letter-spacing: 0.1em;
+    }
+    #story-read-time svg {
+      width: 11px;
+      height: 11px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 1.5;
+      flex-shrink: 0;
+      opacity: 0.7;
+    }
+    .byline-sep {
+      width: 1px;
+      height: 11px;
+      background: rgba(200,185,160,0.18);
+      flex-shrink: 0;
+    }
+    #story-modal.light-mode #story-read-time {
+      color: rgba(50,30,10,0.32);
+    }
+    #story-modal.light-mode .byline-sep {
+      background: rgba(50,30,10,0.15);
+    }
+    #story-modal-body p {
+      font-family: 'Yarden', 'David Libre', 'Frank Ruhl Libre', serif;
+      font-size: clamp(1.05rem, 1.6vw, 1.18rem);
+      line-height: 2.1;
+      color: rgba(220,210,192,0.88);
+      margin-bottom: 2.2em;
+    }
+
+    /* theme toggle button */
+    #story-theme-btn {
+      background: none;
+      border: none;
+      color: rgba(200,185,160,0.45);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.25s, background 0.25s;
+    }
+    #story-theme-btn:hover { color: var(--cream); background: rgba(200,185,160,0.08); }
+    #story-theme-btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.8; flex-shrink: 0; }
+
+    /* ── MODAL LIGHT MODE ── */
+    #story-modal.light-mode {
+      background: #f0e9db;
+      transition: background 0.4s ease, opacity 0.5s ease;
+    }
+    #story-modal.light-mode #story-modal-header {
+      background: linear-gradient(to bottom, rgba(224,215,198,0.98) 55%, rgba(224,215,198,0.82) 80%, transparent);
+      border-bottom: 1px solid rgba(140,100,55,0.12);
+      box-shadow: 0 1px 18px rgba(100,65,20,0.1);
+    }
+    #story-modal.light-mode #story-modal-scroll {
+      background: #f0e9db;
+    }
+    #story-modal.light-mode #story-modal-scroll::-webkit-scrollbar-thumb {
+      background: rgba(60,38,12,0.2);
+    }
+    #story-modal.light-mode #story-modal-hero img {
+      filter: grayscale(15%) brightness(0.88);
+    }
+    #story-modal.light-mode #story-modal-hero-grad {
+      background: linear-gradient(to bottom,
+        transparent 40%,
+        rgba(240,233,219,0.85) 80%,
+        #f0e9db 100%
+      );
+    }
+    #story-modal.light-mode #story-modal-title {
+      color: #1e1209;
+    }
+    #story-modal.light-mode #story-modal-byline {
+      color: rgba(50,30,10,0.45);
+      border-bottom-color: rgba(50,30,10,0.12);
+    }
+    #story-modal.light-mode #story-modal-body p {
+      color: rgba(30,18,9,0.82);
+    }
+    .modal-author-label {
+      font-family: 'Yarden', serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.1em;
+      color: rgba(200,185,160,0.38);
+      transition: color 0.4s;
+    }
+    #story-modal.light-mode .modal-author-label {
+      color: rgba(60,35,10,0.62);
+    }
+    #story-modal.light-mode #story-modal-close,
+    #story-modal.light-mode #story-theme-btn {
+      color: rgba(50,30,10,0.45);
+    }
+    #story-modal.light-mode #story-modal-close:hover,
+    #story-modal.light-mode #story-theme-btn:hover {
+      color: #1e1209;
+      background: rgba(50,30,10,0.08);
+    }
+
+    @media (max-width: 700px) {
+      #stories-gallery { grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 32px 20px; }
+      .gallery-card.story-cover { height: 260px; }
+      #story-modal-content { padding: 0 24px 80px; }
+      #story-modal-header { padding: 20px 24px; }
+    }
+
+    /* ── VIDEO BLUR LAYER ── */
+    #vid-blur-layer {
+      position: absolute;
+      inset: 0;
+      z-index: 4;
+      pointer-events: none;
+    }
+
+    /* ── PAGE CONTENT (below hero) — permanently light ── */
+    #page-content {
+      background: #ede5d8;
+      --bg:    #ede5d8;
+      --cream: rgba(22, 16, 8, 0.9);
+      --muted: rgba(22, 16, 8, 0.52);
+      --faint: rgba(22, 16, 8, 0.25);
+      --line:  rgba(22, 16, 8, 0.12);
+    }
+    #page-content .section-label { color: rgba(22,16,8,0.3); }
+    #page-content #about-photo   { filter: grayscale(100%) contrast(1.08) brightness(0.95); }
+    #page-content footer {
+      color: rgba(22,16,8,0.3);
+      background: #ede5d8;
+    }
+
+    /* ── Filter bar on light background ── */
+    #page-content .filter-btn {
+      color: rgba(40,20,6,0.52);
+      border-color: rgba(40,20,6,0.18);
+    }
+    #page-content .filter-btn:hover {
+      color: rgba(40,20,6,0.82);
+      border-color: rgba(40,20,6,0.38);
+      background: rgba(40,20,6,0.05);
+    }
+    #page-content .filter-btn.active {
+      color: rgba(40,20,6,0.9);
+      border-color: rgba(40,20,6,0.5);
+      background: rgba(40,20,6,0.09);
+    }
+    #page-content .filter-btn.filter-search {
+      border-color: rgba(40,20,6,0.22);
+    }
+    #page-content .filter-sep {
+      background: rgba(40,20,6,0.18);
+    }
+    #page-content #stories-search {
+      color: rgba(40,20,6,0.85);
+      border-bottom-color: rgba(40,20,6,0.25);
+    }
+    #page-content #stories-search::placeholder {
+      color: rgba(40,20,6,0.35);
+    }
+    #page-content #stories-search:focus {
+      border-bottom-color: rgba(40,20,6,0.55);
+    }
+
+    /* ── DIVIDER ── */
+    .section-divider {
+      width: 100%;
+      height: 1px;
+      background: var(--line);
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      text-align: center;
+      padding: 52px 40px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      letter-spacing: 0.25em;
+      color: var(--faint);
+      text-transform: uppercase;
+    }
+
+    /* ── MOBILE ── */
+    @media (max-width: 700px) {
+      .section { padding: 72px 24px; }
+      #scroll-arrow { bottom: 20px; }
+
+      /* Mobile branding: name top-right, tagline below it, social bottom-right vertical */
+      #branding {
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        transform: none;
+        flex-direction: column;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding: 52px 24px 48px;
+        gap: 0;
+      }
+      #branding-line { display: none; }
+      #branding-text {
+        align-items: flex-end;
+        gap: 10px;
+      }
+      #branding-text h2 {
+        font-size: clamp(1.7rem, 7vw, 2.2rem);
+      }
+      /* Social: vertical column, bottom-right */
+      #social {
+        flex-direction: column;
+        align-items: center;
+        gap: 12px;
+      }
+      #social a { width: 34px; height: 34px; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="intro-fade"></div>
+<div id="cursor"></div>
+
+<section id="hero">
+  <video id="vid-a" muted playsinline preload="auto"></video>
+  <video id="vid-b" muted playsinline preload="auto"></video>
+  <div id="overlay"></div>
+  <div id="vintage-overlay"></div>
+  <div id="film-burn"></div>
+  <div id="scanlines"></div>
+  <canvas id="light-canvas"></canvas>
+  <div id="vid-blur-layer"></div>
+  <div id="flash"></div>
+
+  <div id="vid-counter">
+    <span id="vid-current">1</span><span id="vid-sep">/</span><span id="vid-total">60</span>
+  </div>
+
+  <div id="scroll-arrow" onclick="document.getElementById('content').scrollIntoView({behavior:'smooth'})">
+    <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+
+  <div id="branding">
+    <div id="branding-text">
+      <p class="tagline-text">Stories find their seat</p>
+      <h2 dir="rtl">אורי בורשטיין</h2>
+    </div>
+    <div id="branding-line"></div>
+    <div id="social">
+      <a href="https://www.instagram.com/ori.burstein/" target="_blank" aria-label="Instagram">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.334 3.608 1.308.975.975 1.246 2.242 1.308 3.608.058 1.266.07 1.646.07 4.851s-.012 3.584-.07 4.85c-.062 1.366-.334 2.633-1.308 3.608-.975.975-2.242 1.246-3.608 1.308-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.334-3.608-1.308-.975-.975-1.246-2.242-1.308-3.608C2.175 15.584 2.163 15.204 2.163 12s.012-3.584.07-4.85c.062-1.366.334-2.633 1.308-3.608C4.516 2.497 5.783 2.225 7.15 2.163 8.416 2.105 8.796 2.163 12 2.163zm0-2.163C8.741 0 8.332.013 7.052.072 5.197.157 3.355.673 2.014 2.014.673 3.355.157 5.197.072 7.052.013 8.332 0 8.741 0 12c0 3.259.013 3.668.072 4.948.085 1.855.601 3.697 1.942 5.038 1.341 1.341 3.183 1.857 5.038 1.942C8.332 23.987 8.741 24 12 24s3.668-.013 4.948-.072c1.855-.085 3.697-.601 5.038-1.942 1.341-1.341 1.857-3.183 1.942-5.038.059-1.28.072-1.689.072-4.948 0-3.259-.013-3.668-.072-4.948-.085-1.855-.601-3.697-1.942-5.038C20.645.673 18.803.157 16.948.072 15.668.013 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zm0 10.162a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/>
+        </svg>
+      </a>
+      <a href="https://mail.google.com/mail/?view=cm&to=bursteinori@gmail.com" target="_blank" aria-label="Email">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.910 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/>
+        </svg>
+      </a>
+      <a href="https://www.linkedin.com/in/oriburstein" target="_blank" aria-label="LinkedIn">
+        <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+        </svg>
+      </a>
+    </div>
+  </div>
+</section>
+<div id="hero-push"></div>
+
+<div id="page-content">
+
+<!-- STORIES -->
+<section id="content" class="section" dir="rtl">
+  <div class="section-label">סיפורים</div>
+
+  <!-- FILTER BAR -->
+  <div id="stories-filter">
+    <button class="filter-btn active" data-filter="הכל">הכל</button>
+    <button class="filter-btn" data-filter="סיפור קצר">סיפור קצר</button>
+    <button class="filter-btn" data-filter="דיפטיך">דיפטיך</button>
+    <button class="filter-btn" data-filter="פרוזה">פרוזה</button>
+    <button class="filter-btn" data-filter="מונולוג">מונולוג</button>
+    <button class="filter-btn" data-filter="זיכרון">זיכרון</button>
+    <button class="filter-btn" data-filter="טכנולוגיה">טכנולוגיה</button>
+    <span class="filter-sep"></span>
+    <button class="filter-btn filter-search" onclick="toggleSearch()">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      חיפוש
+    </button>
+  </div>
+
+  <!-- SEARCH INPUT (hidden by default) -->
+  <div id="stories-search-wrap" style="display:none;margin-bottom:28px;">
+    <input id="stories-search" type="text" placeholder="חפש סיפור..." dir="rtl"
+      style="
+        width:100%;max-width:340px;
+        background:transparent;
+        border:none;border-bottom:1px solid rgba(200,185,160,0.25);
+        color:rgba(238,228,210,0.85);
+        font-family:'Yarden',serif;font-size:0.9rem;
+        padding:8px 2px;
+        outline:none;
+        transition:border-color 0.25s;
+      "
+      oninput="searchStories(this.value)"
+    >
+  </div>
+
+  <div id="stories-gallery">
+
+    <!-- STORY 1 — dossier / folder style -->
+    <div class="story-file-wrapper" onclick="openStory(1)" data-category="סיפור קצר" data-title="השמיים כרגע כחולים">
+
+      <!-- Folder tab -->
+      <div class="story-folder-tab">
+        <span class="story-folder-tab-num">א׳</span>
+        <span class="story-folder-tab-sep"></span>
+        <span class="story-folder-tab-label">סיפור קצר</span>
+        <span class="story-folder-tab-arrow">›</span>
+      </div>
+
+      <!-- Stacked pages behind -->
+      <div class="story-page-back"></div>
+      <div class="story-page-back"></div>
+
+      <!-- Main card -->
+      <div class="gallery-card story-cover">
+        <img class="story-cover-img" src="freepik_a-breathtaking-ultrawide-_2763376983.png" alt="השמיים כרגע כחולים">
+        <div class="story-cover-overlay"></div>
+
+        <!-- top meta strip -->
+        <div class="story-cover-meta">
+          <span class="story-cover-badge">01</span>
+          <span class="story-cover-readtime-top" id="cover-readtime">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="cover-readtime-label">—</span>
+          </span>
+        </div>
+
+        <!-- bottom text -->
+        <div class="story-cover-body">
+          <h3 class="story-cover-title">השמיים כרגע כחולים</h3>
+          <p class="story-cover-author">אורי בורשטיין</p>
+          <div class="story-cover-divider"></div>
+          <p class="story-cover-teaser">נדמה לו שהוא יודע בדיוק מה היא חושבת, ולכן לא טורח לשאול. נדמה לה שהיא יודעת בדיוק מה הוא אומר, ולכן היא לא טורחת להקשיב.</p>
+        </div>
+
+        <span class="story-read-hint">קרא</span>
+      </div>
+    </div>
+
+    <!-- STORY 2 -->
+    <div class="story-file-wrapper" onclick="openStory(2)" data-category="דיפטיך" data-title="עולמות נחרבים ונבנים ברגע זה ממש">
+
+      <div class="story-folder-tab">
+        <span class="story-folder-tab-num">ב׳</span>
+        <span class="story-folder-tab-sep"></span>
+        <span class="story-folder-tab-label">דיפטיך</span>
+        <span class="story-folder-tab-arrow">›</span>
+      </div>
+
+      <div class="story-page-back"></div>
+      <div class="story-page-back"></div>
+
+      <div class="gallery-card story-cover">
+        <img class="story-cover-img" src="story2.png" alt="עולמות נחרבים ונבנים ברגע זה ממש">
+        <div class="story-cover-overlay"></div>
+
+        <div class="story-cover-meta">
+          <span class="story-cover-badge">02</span>
+          <span class="story-cover-readtime-top">
+            <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="cover-readtime-label-2">—</span>
+          </span>
+        </div>
+
+        <div class="story-cover-body">
+          <h3 class="story-cover-title">עולמות נחרבים ונבנים ברגע זה ממש</h3>
+          <p class="story-cover-author">אורי בורשטיין</p>
+          <div class="story-cover-divider"></div>
+          <p class="story-cover-teaser">אני לוקח עוד לגימה. הוויסקי שורף, אבל זה בדיוק הגועל בגוף שרציתי להרגיש.</p>
+        </div>
+
+        <span class="story-read-hint">קרא</span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<div class="section-divider"></div>
+
+<!-- ABOUT -->
+<section class="section" dir="rtl">
+  <div class="section-label">אודות</div>
+  <div id="about-grid">
+    <img id="about-photo" src="70EBCC29-8198-4A1C-A04F-7E18E85DA6ED_4_5005_c.jpeg" alt="Ori Burstein">
+    <div>
+      <p id="about-statement">מהרצליה לים המלח לירושלים וחזרה. מלימודי תסריטאות לכתיבת קוד – מהמילה שמחפשת סאבטקסט לשורה שמחפשת לוגיקה. מהסצנה שלא נגמרת לבאג שלא משחרר.</p>
+      <p id="about-bio">בתוך כל התנועה הזאת, אני מוצא את עצמי מזגזג: בין הדמויות שחלמתי לברוא לאנשים שחלמתי להיות, ובין אלה שכל כך פחדתי להפוך אליהם. ובין כל המילים, השורות והזהויות – הכיסא תמיד נשאר אותו כיסא.</p>
+      <p id="about-closing">זה המקום שלי להניח את הראש ולנוח רגע.<br>תפסו כיסא, תצטרפו.</p>
+    </div>
+  </div>
+</section>
+
+<footer>© אורי בורשטיין</footer>
+
+</div><!-- /page-content -->
+
+<!-- ── STORY MODAL ── -->
+<div id="story-modal">
+  <div id="story-modal-header">
+    <span class="modal-author-label">אורי בורשטיין</span>
+    <div style="display:flex;gap:4px;align-items:center;">
+      <!-- sun / moon toggle -->
+      <button id="story-theme-btn" onclick="toggleStoryTheme()" aria-label="החלף תצוגה">
+        <svg id="story-theme-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+      </button>
+      <!-- close X -->
+      <button id="story-modal-close" onclick="closeStory()" aria-label="סגור">
+        <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+  </div>
+  <div id="story-modal-scroll">
+    <div id="story-modal-hero">
+      <img src="freepik_a-breathtaking-ultrawide-_2763376983.png" alt="">
+      <div id="story-modal-hero-grad"></div>
+    </div>
+    <div id="story-modal-content">
+      <h2 id="story-modal-title">השמיים כרגע כחולים</h2>
+      <div id="story-modal-byline">
+        <span>אורי בורשטיין</span>
+        <span class="byline-sep"></span>
+        <span id="story-read-time">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="story-read-time-label">—</span>
+        </span>
+      </div>
+      <div id="story-modal-body"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ── STORY CONTENT TEMPLATES (hidden) ── -->
+<div style="display:none">
+
+  <div id="story-body-1">
+    <p>נדמה לו שהוא יודע בדיוק מה היא חושבת, ולכן לא טורח לשאול. היא בטח כבר מתחרטת על הספונטניות המזויפת הזו, על ההחלטה לשכב על הדשא כמו ילדה קטנה שלא חשבה על ההשלכות. הוא יכול ממש לשמוע את גלגלי השיניים בראש שלה מחשבים את הנזק. הכתמים על הבגדים, הלכלוך שנכנס לציפורניים, ובעיקר השיער. היום היא תצטרך לחפוף זמן רב מהרגיל ולהיאבק בקשרים. היא בת שלושים וארבע, מה הקטע?</p>
+    <p>ונדמה לה שהיא יודעת בדיוק מה הוא אומר, ולכן היא לא טורחת להקשיב. המילים שלו הופכות לרעש רקע מונוטוני, כמו זמזום של מנורת פלורסנט. כל מחשבה שעולה בראשו נפלטת מיד מפיו, זרם תודעה לא מסונן של ילד קטן שחייב לשתף את העולם בקיומו. הוא לא יסתפק באמירה, הוא יקדח ויוסיף שאלות הבהרה, רק כדי לוודא שהיא איתו. היא לא. השמיים אפורים. ענן גדול וכבד בצורת היפופוטם חולף מעליהם, מטיל צל קריר.</p>
+    <p>נדמה לו שהיא מתה להציץ בנייד, שהאצבעות שלה ממש מגרדות בתוך הכיס. היא בטח תוהה איזו התראה קפצה בזמן שהם בוהים בעננים. מה כבר יכול להיות דחוף כל כך שאי אפשר לחכות? המחשבה הזו מנקרת בו, אולי יש מישהו שהיא מסתירה?</p>
+    <p>ונדמה לה שהוא שוב מתלונן. מדבר על הכאב הטורדני בצוואר, על נמלים דמיוניות או על זה שהוא חייב להשתין. אבל היא לא באמת בהאזנה. היא מתרגלת את אומנות ההנהון האוטומטי, ממלמלת "אממ" ברגעים אקראיים, ולעיתים משחררת גיחוך קטן בתקווה שפגעה בתזמון הנכון. הזיוף הזה מגעיל אותה, מתי היא הפכה להיות כל כך דומה לאמא שלה? השמש מבצבצת והשמיים נצבעים כתומים.</p>
+    <p>נדמה לו שהיא עומדת לכעוס עליו. על זה שהוא לא שותק, שהוא לא מסוגל פשוט להיות רגע בתוך הרגע. הוא מבין שאין הבדל אמיתי בין מחשבות שנאמרות בקול לבין אלו שנאמרות בפנים, ולכן מחליט לשתוק ולנסות לחקות אותה. להביט בעננים ולחפש צורות. אבל רק לכמה שניות, בסדר? היד שלו נשמטת ונוגעת בטעות בגב כף ידה והיא באינסטינקט מיידי נרתעת. בחסות השתיקה שכפה על עצמו, הידיים זוחלות חזרה, מהססות, עד שהן מוצאות זו את זו שוב. הפעם הן לא זזות. זרת נוגעת בזרת.</p>
+    <p>ונדמה לה שהוא שוב מנתח את השקיעה, מדבר על כמה שהיא יפה בצורה בלתי נסבלת. הוא מעולם לא ידע פשוט להנות משקיעות. מאז שהיה נער טען בלהט שככל שהשקיעה יפה וצבעונית יותר, כך זיהום האוויר חמור יותר. אפילו ברגע הזה, מול היופי הכתום הזה, הוא מצליח למצוא את השליליות. השמש שוקעת. השמיים, בגווני כחול עמוק וסגול, נחתכים על ידי מטוס שחולף הרחק מעל, משאיר שובל לבן.</p>
+    <p>הוא שוכב לידה, ובטוח שהיא חושבת על הטיסה לפריז. זו שבוטלה ברגע האחרון בגלל העבודה שלו. הוא לא יצליח להגיד לה שהוא זוכר את פריז, שהוא זוכר את ההבטחה. למרות שמעולם לא היו שם, הוא יודע שהם היו הולכים הרבה ברגל, שותקים בבתי קפה, ושאולי זה היה עושה להם טוב. אבל הוא למד שברגעים כאלה עדיף לא להציף שום דבר. כל דבר חדש נהיה סיפור, כל סיפור נהיה הסבר, וכל הסבר נהיה מתיש. אז הוא מעדיף לדבר על משהו אחר.</p>
+    <p>ונדמה לה שהוא מדבר על המטוס. בטח מסביר שסטייה של אחוז אחד בכיוון תסיט אותו ממסלולו במאתיים חמישים קילומטרים, או איזו עובדה מיותרת אחרת. חבל שאין לה חברה טובה לראות איתה שקיעה בשקט, מישהי שפשוט תהיה שם בלי חפירות על מספרים וזוויות. אבל אחת נהרגה בפיגוע, השנייה ילדה תאומים, השלישית עברה לצפון והתנתקה, והרביעית נעלמה מחייה בלי הסבר. היא לבד כאן, לידו.</p>
+    <p>השמש נעלמה והשמיים משחירים במהירות וחבל שהוא לא שאל אותה על מה היא חושבת. היא נזכרה פתאום בילדות, איך הוריה הניפו אותה באוויר כשחצו כביש, מעבירים אותה מעל הקווים הלבנים. אבא שלה היה בוחן אותה, מצביע על חפצים ומבקש צבע מתאים. הרמזור? ירוק. האופנוע? אדום. החולצה? צהוב. השמיים? <em>אני לא יודעת.</em> השמיים כחולים, טיפשונת. נכון, נכון, תשאל שוב. השמיים? כחול! היא לא הבינה למה. הרי הם היו אפורים, או כתומים, או שחורים או בכל צבע אחר. היא בהתה בשמיים ולא הבינה למה אביה טוען שהם כחולים, עד שכמעט מעדה. מזל שהוריה החזיקו אותה. השאלה הזאת חזרה אליה עכשיו, מהדהדת, למה כולם בטוחים שהשמיים כחולים כשהם משתנים כל כך הרבה? חבל. זה בדיוק משהו שהיא יכלה לשתף אותו, מחשבה שהייתה יכולה לעניין אותו.</p>
+    <p>השמיים מתמלאים כוכבים קטנים וחבל שהיא רק עשתה את עצמה מקשיבה. אולי אם הייתה מקשיבה באמת, הייתה מבינה כמה הם דומים. הוא סיפר לה באותו רגע שכשהיה קטן הכין קובות מחול בים, ולפעמים אכל אותן כי אהב את הקראנצ'יות המלוחה בשיניים. הוא שאל את אביו למה הים כחול, והוא ענה בחוסר סבלנות שזו השתקפות השמיים. ואז שאל למה השמיים כחולים? ואביו גם לא באמת הקשיב, ענה שוב שזו ההשתקפות. הוא לא ויתר ושאל שוב, אבל בגלל הפה המלא חול אביו לא שמע. הוא ויתר.</p>
+    <p>פתאום, צפירה עמומה של רכב ממרחק פולחת את האוויר, קוטעת באחת את זרם המונולוגים הפנימיים שלהם. באותה שנייה בדיוק, כאילו הופעלו על ידי אותו מנגנון נסתר, שניהם לוקחים שאיפה עמוקה ופותחים את הפה. "תגידי..." הוא פולט בחצי קול. "אני..." היא מתחילה במקביל. הקולות שלהם מתנגשים לרגע באוויר הלח, ושניהם משתתקים מיד, נבוכים. הוא מחכה שהיא תמשיך, בטוח שעמדה לבקש שילכו הביתה. היא מחכה שיסיים, משוכנעת שהוא עומד לתת לה עוד הרצאה מיותרת. אבל מתחת להנחות האלו, הלב של שניהם מחסיר פעימה בתקווה סמויה שהשני פשוט ישאל "על מה את חושבת?". אף אחד מהם לא ממשיך את המשפט. המילים צוללות חזרה פנימה, כבדות מרוב כוונות שלא מומשו.</p>
+    <p>היא חושבת לעצמה שאולי אם יאמרו מספיק פעמים שהשמיים כתומים, כולם יאמינו לזה בסוף. הוא חושב בקול לעצמו שהצבע לא משנה, העיקר שיש על מה להסתכל למעלה כשלא יודעים על מה לדבר למטה. כל המחשבות, הזיכרונות, הפחדים פשוט חולפים, לא נכנסים בשום אוזן אז איך יצאו?</p>
+    <p>וכך הם מפספסים זה את זו ממרחק כל כך קטן. השמיים כבר לא משתנים, הלילה הגיע סופית. הם שוכבים שם על הדשא הלח, שני אנשים מבוגרים מספיק כדי לדעת שלא לכל שאלה יש הקשבה. ועדיין צעירים מספיק, כדי להצטער על שאלות שלא שאלו.</p>
+  </div>
+
+  <div id="story-body-2">
+    <h4 class="story-section-heading">שיחה מלוכלכת</h4>
+    <p>אני לוקח עוד לגימה. הוויסקי שורף, אבל זה בדיוק הגועל בגוף שרציתי להרגיש. בזמן שהמלצרית מדגמנת לי בוז, החלאה מהשולחן ליד מחזיק את הטלפון מול הפרצוף, מואר באור כחלחל שמנוגד לאור הבוקר, ואומר משהו לתוך המסך. משהו כמו ״תורידי את הטוסיק, יפה שלי.. כן, למטה, עד הרצפה..״ חלאה. אגואיסט. תת רמה. איך אתה מדבר אליה? ״תדחפי את עצמך פנימה.. הכי עמוק שאת יכולה. זה לא נעים, אני יודע״. הוא מעיף מבט חטוף לכיווני, ומנמיך את הקול ״אל תדאגי, זה נשאר בינינו״. זבל גברי. בוגד מסריח. הם מקיפים אותי. ״פשוט תגידי לי איפה את״ לואט הגבר לטלפון, מסנן בשקט תשובות, ואז מוסיף ״אני כבר מגיע״.</p>
+    <p>בא לי לקום, לתפוס את הפרצוף החלקלק שלו ולמרוח אותו על השולחן יחד עם הקרואסון שהוא לא נגע בו. לנפץ את הטלפון, ואת הבועה שהוא חי בה. אבל גם מתוך ערפל האלכוהול, אני יודע שלא אעז לעשות את זה בחיים. הגבר קם למלצרית ומבקש חשבון. הוא ממהר, יש לו חיים כפולים לנהל. אני זורק לעברו ״כבר עוזב אותנו?״ כמה משפחות עוד תפרק לפני הצהריים? ״חייב לזוז״ הוא עונה, העיניים שלו תקועות במסך.</p>
+    <p>״לאן?״ בוא, תשב, אני אזמין אותך. נשתה לחיי היכולת להגיד לא. הבוגד מתעלם ממני ומוציא את ארנקו בחוסר סבלנות. ״אתה יודע מה קורה בסוף?״ אני שואל. הוא עונה ״לא״ בניסיון להיפטר ממני. בסוף מישהו מגיע עם פמוט ופותח לך את התחת באיזו סמטה. בסוף משפחות מתפרקות בגלל אנשים כמוך. בסוף מישהו עולה עליהם. תמיד. ״בסוף אתה תבין שלא היית צריך לרוץ. שאתה והיא יכולתם להישאר בבית, ושהכל היה בסדר גמור.״</p>
+    <p>ואולי אתה בחור טוב. אולי אתה חושב שזו אהבה. אולי אתה עיוור למה שאתה גורם. אני מנסה לשדר לו את המחשבות, אבל הן שוחות לאט בתוך האלכוהול עד שהן הופכות למילים, והבוגד כבר מפנה לי את הגב ומתחיל להתרחק. אני תופס אותו בידו ואומר ״אתה עומד לעשות טעות גדולה. טעות שתתחרט עליה עוד הרבה זמן. עמוק בפנים אתה יודע שעדיף לך להסתובב וללכת הביתה. הבוקר הזה הוא צרות.״</p>
+    <p>הוא עוצר. הגוף שלו נדרך, והמבט שלו נשאר עליי, המום. לרגע אחד נדמה שהוא עומד להנהן, ולשקול ברצינות את דבריי. אבל השניה הזאת חולפת מהר מדי. הבוגד מנער אותי ממנו ויוצא במהירות מבית הקפה, עדיין צמוד למסך. אני מסתובב חזרה אל השולחן. לוקח עוד לגימה ומסתכל על המלצרית.</p>
+    <p>המלצרית הזאת לא מפסיקה לנעוץ בי מבטים. יש לה פרצוף של אחת שבטוחה שהיא נולדה כדי לחנך את המין האנושי. בטח היא חושבת שאני הסיבה שנשים חוצות את הכביש לצד השני, שאני הסיבה שמאי עברה צד ובגדה בי עם נשים. אולי את צודקת, גברת שופטת. אולי באמת לא הייתי מספיק גבר, לא מספיק זיין, לא מספיק כלום. תעשי טובה, תורידי את האף ותביאי לי עוד כוס, לפני שאני אתחיל להאמין למה שהעיניים שלך צועקות.</p>
+    <p>אני אסיים את הכוס ואחזור הביתה, למיטה הקרה. אקלל בליבי את המלצרית שחושבת שהיא יודעת מה עובר על אחרים, אאחל את הרע מכל לבוגד — שהבת שלו תידרס, שיתפגר מסרטן, לא אכפת לי — העיקר שהמחשבות לא יעצרו, שימשיכו הלאה, אליה, אל שני, ואל כל הנשים שהיא הייתה איתן, ואסיים בכל מי שמעז לחשוב שלנישואים כבר אין משמעות בעולם הזה.</p>
+    <h4 class="story-section-heading">שיחה אחרונה</h4>
+    <p>זה הכל. מה שנותר זו רק הבטחה שהופרה, ותמונת סטילס של אב הרץ אל רכב, מבלי לדעת שאין לו לאן להגיע. מאז, המשפט ההוא מהדהד בי ולא מרפה. אני שומע אותו בכל מקום, בדיוק כמו שקורה שמדברים על טיסה לאיטליה ופתאום כל העולם נצבע בפרסומות לרומא. המנגנון הזה גורם לי לחשוב על הצורך הנואש שלנו לייצר היגיון בכאוס. איך אנחנו מספרים לעצמנו סיפורים שלמים על סמך רסיסי מציאות אקראיים רק כדי לחבר את הנקודות. ומשם המחשבה נודדת אל הזרים שאנחנו רואים ברחוב, שומעים חצי משפט ובונים להם חיים מלאים בראשנו. כמה הייתי נותן עכשיו כדי להתקיים בתוך עולם כזה, עולם בדוי בראשו של אדם אחר. שם, במקום שבו אפשר ללטש את טיוטת חיינו שוב ושוב, את בטח היית חיה. תחשבי כמה עולמות נבנים ונחרבים ברגע זה ממש, על סמך מילים שהוצאו מהקשרן?</p>
+    <p>כתיבת הספד אותנטי היא משימה בלתי אפשרית. לא אקריא את הדפים הללו. הם שקר. הם מנסים לייפות את המוות, לתרבת אותו, הם בונים עולם מעוות מהמציאות ברגע. במקום הניסיונות העלובים לתאר מי היית למיליון אנשים שאיני מכיר — וכנראה גם את לא — אני מריץ בראשי את השיחה האחרונה איתך: מה הייתי אומר לך אחרת? ומה את היית אומרת לי?</p>
+    <p>אני זוכר את קולי, מנסה לשדר רוגע. פוקד עלייך להנמיך את הגוף. להיצמד לאדמה. אני שומע את תשובתך, חנוקה מבכי ״אבא, הרצפה קרה.. ויש פה זכוכיות..״ אני עונה לך שלא אכפת לי ״תדחפי את עצמך פנימה.. הכי עמוק שאת יכולה.. תרגישי את זה לוחץ עלייך מכל הכיוונים״. ואת, בקול רועד, מבקשת ממני לא לספר לאמא, ואני מבטיח לך ״אל תדאגי, זה נשאר בינינו״. אני שואל איפה את ומשקר שאני כבר מגיע.</p>
+    <p>רגעים ספורים לפני שיצאת, אמא עמדה בדלת. היא סרקה את הבגדים שלך. היא שונאת את מסיבות הטבע האלה. היא אחזה בידך ואמרה מילים שמהדהדות בי ״את עומדת לעשות טעות גדולה. טעות שתתחרטי עליה. עמוק בפנים את יודעת שעדיף לך להישאר בבית. המסיבה הזאת היא צרות.״ ואני עמדתי מאחורי גבה והענקתי לך הנהון קטן. הנהון שאומר הכל בסדר, אבא ירגיע אותה, לכי לטרוף את החיים. שלחתי אותך לחיות, ובמקום זאת, שלחתי אותך אל מותך.</p>
+    <p>אני זוכר את חריקת הכיסא בבית הקפה. ואני זוכר אותו. שיכור שישב בשולחן ליד. הוא תפס לי את היד, והמילים שיצאו לו מהפה.. הן היו אותן המילים של אמא. בדיוק. התנערתי ממנו ויצאתי אל הרוח ברחוב, נצמד לטלפון ושואל אם את עוד שם. את לוחשת לי שיש רעשים בחוץ וצעקות בערבית. אני מתחנן בפנייך לא לזוז משם. את אומרת שאת מפחדת. ועם טריקת דלת הרכב, אני נשבע לך שנחזור הביתה. ואז הירייה. והניתוק.</p>
+  </div>
+
+</div>
+
+</div>
+
+<script>
+// ─────────────────────────────────────────────
+// CONFIG
+// ─────────────────────────────────────────────
+const VIDEO_DIR = 'list-List %232-2026-04-09_20_49/';
+
+const VIDEOS = [
+  'freepik_subtle-cinematic-movement_2753176903.mp4',
+  'freepik_subtle-cinematic-movement_2753176980.mp4',
+  'freepik_subtle-cinematic-movement_2753177153.mp4',
+  'freepik_subtle-cinematic-movement_2753177283.mp4',
+  'freepik_subtle-cinematic-movement_2753177441.mp4',
+  'freepik_subtle-cinematic-movement_2753177559.mp4',
+  'freepik_subtle-cinematic-movement_2753177620.mp4',
+  'freepik_subtle-cinematic-movement_2753200539.mp4',
+  'freepik_subtle-cinematic-movement_2753200688.mp4',
+  'freepik_subtle-cinematic-movement_2753200805.mp4',
+  'freepik_subtle-cinematic-movement_2753200913.mp4',
+  'freepik_subtle-cinematic-movement_2753201060.mp4',
+  'freepik_subtle-cinematic-movement_2753201175.mp4',
+  'freepik_subtle-cinematic-movement_2753223566.mp4',
+  'freepik_subtle-cinematic-movement_2753223690.mp4',
+  'freepik_subtle-cinematic-movement_2753223781.mp4',
+  'freepik_subtle-cinematic-movement_2753223930.mp4',
+  'freepik_subtle-cinematic-movement_2753224104.mp4',
+  'freepik_subtle-cinematic-movement_2753224253.mp4',
+  'freepik_subtle-cinematic-movement_2753247965.mp4',
+  'freepik_subtle-cinematic-movement_2753248151.mp4',
+  'freepik_subtle-cinematic-movement_2753248258.mp4',
+  'freepik_subtle-cinematic-movement_2753248316.mp4',
+  'freepik_subtle-cinematic-movement_2753248490.mp4',
+  'freepik_subtle-cinematic-movement_2753248666.mp4',
+  'freepik_subtle-cinematic-movement_2753270296.mp4',
+  'freepik_subtle-cinematic-movement_2753270585.mp4',
+  'freepik_subtle-cinematic-movement_2753270667.mp4',
+  'freepik_subtle-cinematic-movement_2753270751.mp4',
+  'freepik_subtle-cinematic-movement_2753292354.mp4',
+  'freepik_subtle-cinematic-movement_2753292517.mp4',
+  'freepik_subtle-cinematic-movement_2753292648.mp4',
+  'freepik_subtle-cinematic-movement_2753292800.mp4',
+  'freepik_subtle-cinematic-movement_2753292978.mp4',
+  'freepik_subtle-cinematic-movement_2753293131.mp4',
+  'freepik_subtle-cinematic-movement_2753315147.mp4',
+  'freepik_subtle-cinematic-movement_2753315361.mp4',
+  'freepik_subtle-cinematic-movement_2753315480.mp4',
+  'freepik_subtle-cinematic-movement_2753315618.mp4',
+  'freepik_subtle-cinematic-movement_2753315769.mp4',
+  'freepik_subtle-cinematic-movement_2753337060.mp4',
+  'freepik_subtle-cinematic-movement_2753337206.mp4',
+  'freepik_subtle-cinematic-movement_2753337371.mp4',
+  'freepik_subtle-cinematic-movement_2753337549.mp4',
+  'freepik_subtle-cinematic-movement_2753337686.mp4',
+  'freepik_subtle-cinematic-movement_2753337824.mp4',
+  'freepik_subtle-cinematic-movement_2753359280.mp4',
+  'freepik_subtle-cinematic-movement_2753359401.mp4',
+  'freepik_subtle-cinematic-movement_2753359568.mp4',
+  'freepik_subtle-cinematic-movement_2753359737.mp4',
+  'freepik_subtle-cinematic-movement_2753359977.mp4',
+  'freepik_subtle-cinematic-movement_2753380614.mp4',
+  'freepik_subtle-cinematic-movement_2753380814.mp4',
+  'freepik_subtle-cinematic-movement_2753380949.mp4',
+  'freepik_subtle-cinematic-movement_2753381092.mp4',
+  'freepik_subtle-cinematic-movement_2753381251.mp4',
+  'freepik_subtle-cinematic-movement_2753381411.mp4',
+  'freepik_subtle-cinematic-movement_2753402838.mp4',
+  'freepik_subtle-cinematic-movement_2753402995.mp4',
+  'freepik_subtle-cinematic-movement_2753403154.mp4',
+];
+
+const CLIP_DURATION = 3500; // ms per clip
+const LANG_SWITCH_EVERY = 2; // switch language every N clips
+
+// ─────────────────────────────────────────────
+// CURSOR
+// ─────────────────────────────────────────────
+const cursorEl = document.getElementById('cursor');
+let cx = -100, cy = -100;
+document.addEventListener('mousemove', e => {
+  cx = e.clientX; cy = e.clientY;
+  cursorEl.style.left = cx + 'px';
+  cursorEl.style.top  = cy + 'px';
+});
+document.querySelectorAll('a, #scroll-arrow').forEach(el => {
+  el.addEventListener('mouseenter', () => cursorEl.classList.add('big'));
+  el.addEventListener('mouseleave', () => cursorEl.classList.remove('big'));
+});
+
+// ─────────────────────────────────────────────
+// INTRO FADE
+// ─────────────────────────────────────────────
+window.addEventListener('load', () => {
+  setTimeout(() => document.getElementById('intro-fade').classList.add('out'), 200);
+});
+
+// ─────────────────────────────────────────────
+// STATE
+// ─────────────────────────────────────────────
+const vidA = document.getElementById('vid-a');
+const vidB = document.getElementById('vid-b');
+
+let current = vidA;
+let standby = vidB;
+let running = false;
+
+// Smart preload: track what's already loading in standby
+let preloadedIdx = -1;
+let preloadPromise = null;
+
+// ─────────────────────────────────────────────
+// HELPERS — full-deck shuffle, no repeats until all seen
+// ─────────────────────────────────────────────
+let shuffleDeck = [];
+
+function refillDeck() {
+  // Fisher-Yates shuffle of all indices
+  shuffleDeck = Array.from({ length: VIDEOS.length }, (_, i) => i);
+  for (let i = shuffleDeck.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [shuffleDeck[i], shuffleDeck[j]] = [shuffleDeck[j], shuffleDeck[i]];
+  }
+}
+
+function pickNext() {
+  if (shuffleDeck.length === 0) {
+    refillDeck();
+    vidSeenCount = 0; // reset counter display for new cycle
+    vidCurrentEl.textContent = '0';
+  }
+  return shuffleDeck.pop();
+}
+
+function sleep(ms) {
+  return new Promise(resolve => {
+    const deadline = Date.now() + ms;
+    const attempt = () => {
+      if (document.hidden) {
+        // Tab is hidden — pause until it becomes visible again
+        document.addEventListener('visibilitychange', attempt, { once: true });
+        return;
+      }
+      const remaining = deadline - Date.now();
+      if (remaining <= 0) { resolve(); return; }
+      setTimeout(attempt, remaining);
+    };
+    attempt();
+  });
+}
+
+// Begin loading idx into standby element (non-blocking)
+function beginPreload(idx) {
+  preloadedIdx = idx;
+  const el = standby; // capture now — swap() may change `standby` later
+  preloadPromise = new Promise(resolve => {
+    let settled = false;
+    const done = () => {
+      if (settled) return;
+      settled = true;
+      el.removeEventListener('canplay', done);
+      el.removeEventListener('error', done);
+      resolve();
+    };
+    el.src = VIDEO_DIR + VIDEOS[idx];
+    el.addEventListener('canplay', done);
+    el.addEventListener('error', done);
+    el.load();
+    setTimeout(done, 3000); // local server should load in ms, 3s is generous
+  });
+  return preloadPromise;
+}
+
+function swap() {
+  const incoming = standby;
+  const outgoing = current;
+
+  // Incoming rises above outgoing — fades in OVER a still-visible video (no bg bleed)
+  incoming.style.zIndex = '2';
+  outgoing.style.zIndex = '1';
+  incoming.classList.add('active');
+
+  incoming.play().catch(() => {
+    incoming.load();
+    setTimeout(() => incoming.play().catch(() => {}), 60);
+  });
+
+  [current, standby] = [standby, current];
+
+  // After fade-in, hide outgoing — but ONLY if it's still the standby.
+  // If a newer swap has already claimed it as current, leave it alone.
+  setTimeout(() => {
+    if (outgoing === standby) {
+      outgoing.style.transition = 'none';
+      outgoing.classList.remove('active');
+      void outgoing.offsetHeight;
+      outgoing.style.transition = '';
+    }
+    outgoing.style.zIndex = '';
+    incoming.style.zIndex = '';
+  }, 600);
+}
+
+// ─────────────────────────────────────────────
+// PLAYBACK ENGINE
+// ─────────────────────────────────────────────
+async function playSingle(durationMs) {
+  // Reuse already-preloaded video if available, otherwise preload now
+  let idx;
+  if (preloadedIdx !== -1) {
+    idx = preloadedIdx;
+    await preloadPromise;
+  } else {
+    idx = pickNext();
+    await beginPreload(idx);
+    await preloadPromise;
+  }
+  preloadedIdx = -1;
+  preloadPromise = null;
+  swap();
+
+  // Delay preload until the crossfade finishes (600ms) — loading a new src into
+  // the outgoing element while it's still fading out causes a visible glitch frame.
+  // 3500ms clip − 650ms delay still leaves 2850ms to preload, plenty for local files.
+  setTimeout(() => {
+    const upNext = pickNext();
+    beginPreload(upNext);
+  }, 650);
+
+  if (durationMs !== undefined) {
+    await sleep(durationMs);
+  } else {
+    const playingEl = current; // capture before any async swap
+    await new Promise(resolve => {
+      let done = false;
+      const finish = () => { if (done) return; done = true; playingEl.removeEventListener('ended', finish); resolve(); };
+      playingEl.addEventListener('ended', finish);
+      setTimeout(finish, 7000); // videos are max 5s, 7s is a safe ceiling
+    });
+  }
+}
+
+// ─────────────────────────────────────────────
+// VIDEO COUNTER
+// ─────────────────────────────────────────────
+const vidCounterEl  = document.getElementById('vid-counter');
+const vidCurrentEl  = document.getElementById('vid-current');
+const vidTotalEl    = document.getElementById('vid-total');
+let vidSeenCount    = 0;
+vidTotalEl.textContent = VIDEOS.length;
+
+function updateCounter() {
+  vidSeenCount++;
+  vidCurrentEl.textContent = vidSeenCount;
+}
+
+refillDeck(); // initial shuffle before first play
+
+async function loop() {
+  if (running) return;
+  running = true;
+  let clipCount = 0;
+
+  try {
+    while (true) {
+      await playSingle(CLIP_DURATION);
+      clipCount++;
+      updateCounter();
+    }
+  } catch (err) {
+    console.warn('Loop error, restarting:', err);
+    running = false;
+    preloadedIdx = -1;
+    preloadPromise = null;
+    setTimeout(loop, 500);
+  }
+}
+
+
+// ─────────────────────────────────────────────
+// LANGUAGE SWITCH  — character scramble
+// ─────────────────────────────────────────────
+const brandingTextEl = document.getElementById('branding-text');
+const taglineEl      = brandingTextEl.querySelector('.tagline-text');
+const nameEl         = brandingTextEl.querySelector('h2');
+
+
+let langSwitching = false;
+
+// Cinematic blur+scale transition for a single element
+async function transitionTo(el, newText, isHe, midStyles) {
+  // OUT: expand + blur + fade
+  el.style.transition = 'opacity 0.32s ease, transform 0.32s ease, filter 0.32s ease';
+  el.style.opacity   = '0';
+  el.style.filter    = 'blur(10px)';
+  el.style.transform = 'scale(1.07)';
+
+  await sleep(350);
+
+  // Swap content while invisible
+  el.textContent = newText;
+  el.setAttribute('dir', isHe ? 'rtl' : 'ltr');
+  if (midStyles) Object.assign(el.style, midStyles);
+
+  // Prep IN position (no transition)
+  el.style.transition = 'none';
+  el.style.transform  = 'scale(0.94)';
+  el.style.filter     = 'blur(10px)';
+  void el.offsetHeight;
+
+  // IN: focus + settle
+  el.style.transition = 'opacity 0.45s ease, transform 0.45s cubic-bezier(0.2,0,0,1), filter 0.45s ease';
+  el.style.opacity   = '1';
+  el.style.filter    = 'blur(0)';
+  el.style.transform = 'scale(1)';
+
+  await sleep(480);
+
+  // Clear all inline animation styles so scroll-driven applyScroll() can take over instantly
+  el.style.transition = '';
+  el.style.filter     = '';
+  el.style.transform  = '';
+  el.style.opacity    = '';
+}
+
+
+// ─────────────────────────────────────────────
+// SCROLL → BANNER MORPH
+// ─────────────────────────────────────────────
+const heroEl          = document.getElementById('hero');
+const heroPushEl      = document.getElementById('hero-push');
+const brandingEl      = document.getElementById('branding');
+const brandingLineEl  = document.getElementById('branding-line');
+const overlayEl       = document.getElementById('overlay');
+const blurLayerEl     = document.getElementById('vid-blur-layer');
+const arrowEl         = document.getElementById('scroll-arrow');
+const socialEl        = document.getElementById('social');
+const vintageOverlayEl= document.getElementById('vintage-overlay');
+const filmBurnEl      = document.getElementById('film-burn');
+const scanlinesEl     = document.getElementById('scanlines');
+const lightCanvasEl   = document.getElementById('light-canvas');
+
+const BANNER_H = 56;
+function lerp(a, b, t) { return a + (b - a) * t; }
+function easeInOut(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+function easeOut(t)   { return 1 - Math.pow(1 - t, 2.5); }
+
+// Precomputed movement targets — remeasured after load, resize, and lang switch
+let scrollTargets = null;
+
+function computeScrollTargets() {
+  const vh       = window.innerHeight;
+  const vw       = window.innerWidth;
+  const isMobile = vw < 700;
+
+  heroEl.style.height     = vh + 'px';
+  heroPushEl.style.height = vh + 'px';
+
+  brandingTextEl.style.transform = '';
+  nameEl.style.transform         = '';
+  nameEl.style.transition        = '';
+  nameEl.style.filter            = '';
+  nameEl.style.opacity           = '';
+  taglineEl.style.transform      = '';
+  taglineEl.style.transition     = '';
+  taglineEl.style.filter         = '';
+  socialEl.style.transform       = '';
+  socialEl.style.opacity         = '';
+  socialEl.style.flexDirection   = '';
+  socialEl.style.gap             = '';
+
+  void heroEl.offsetHeight;
+  const pad = isMobile ? 16 : 28;
+
+  const nameRect = nameEl.getBoundingClientRect();
+  const socRect  = socialEl.getBoundingClientRect();
+  if (nameRect.width === 0 || socRect.width === 0) return;
+
+  const nameSize0 = parseFloat(getComputedStyle(nameEl).fontSize);
+  const nameSize1 = 15;
+  const nameScale = nameSize1 / nameSize0;
+
+  // Desktop: #branding is top:50%, moves up as hero shrinks.
+  // Mobile:  #branding is top:0 (fills hero), container itself doesn't shift.
+  const brandingMoveY = isMobile ? 0 : (vh / 2 - BANNER_H / 2);
+
+  // ── name → RIGHT side of banner ──
+  const textDX = (vw - pad) - (nameRect.left + nameRect.width / 2) - (nameRect.width * nameScale) / 2;
+  const textDY = BANNER_H / 2 - nameRect.height / 2 - nameRect.top + brandingMoveY;
+
+  // ── social ──
+  // Desktop: moves to left side of banner.
+  // Mobile: just fade out — banner is too narrow for vertical icons.
+  const socialDX = isMobile ? 0 : (pad - socRect.left);
+  const socialDY = isMobile ? 0 : (BANNER_H / 2 - (socRect.top + socRect.height / 2) + brandingMoveY);
+
+  scrollTargets = { textDX, textDY, socialDX, socialDY, nameScale, isMobile };
+}
+
+let scrollTicking = false;
+function applyScroll() {
+  const vh    = window.innerHeight;
+  const maxSc = Math.max(1, (vh - BANNER_H) * 0.5);
+  const t     = Math.min(1, Math.max(0, window.scrollY / maxSc));
+  const e     = easeOut(t);
+
+  // ── Hero height ──
+  heroEl.style.height = lerp(vh, BANNER_H, t) + 'px';
+
+  // ── Hero push: shrinks in sync so content starts right below the banner ──
+  heroPushEl.style.height = lerp(vh, BANNER_H + maxSc, t) + 'px';
+
+  // ── Banner: warm deep wood brown, kicks in at t=0.45 ──
+  const cT = Math.max(0, Math.min(1, (t - 0.45) / 0.55));
+  // very dark aged wood → rgb(40,18,10)
+  const oR = Math.round(lerp(13,  40, cT));
+  const oG = Math.round(lerp(11,  18, cT));
+  const oB = Math.round(lerp( 8,  10, cT));
+  heroEl.style.background = `rgb(${oR},${oG},${oB})`;
+
+  // ── Overlay: blend to wood tone at end ──
+  const oA = lerp(0.52, 0.97, e + cT * 0.25);
+  overlayEl.style.background = `rgba(${oR},${oG},${oB},${Math.min(0.97, oA)})`;
+
+  // ── Vintage / light effects: start fading at t=0.4, gone by t=0.8 ──
+  const effectOpacity = Math.max(0, Math.min(1, (0.8 - t) / 0.40));
+  vintageOverlayEl.style.opacity = effectOpacity;
+  filmBurnEl.style.opacity       = effectOpacity;
+  scanlinesEl.style.opacity      = effectOpacity;
+  lightCanvasEl.style.opacity    = effectOpacity;
+
+  // ── Video blur layer ──
+  const blurPx = lerp(0, 4, e);
+  if (blurPx > 0.05) {
+    blurLayerEl.style.backdropFilter = `blur(${blurPx.toFixed(1)}px)`;
+    blurLayerEl.style.background     = `rgba(0,0,0,${lerp(0, 0.11, e)})`;
+  } else {
+    blurLayerEl.style.backdropFilter = '';
+    blurLayerEl.style.background     = 'transparent';
+  }
+
+  // ── Tagline: fade out fast ──
+  if (!langSwitching) {
+    taglineEl.style.opacity = String(Math.max(0, 1 - t * 3.5));
+  }
+
+  // ── Branding line: compress + fade ──
+  const lineT = Math.max(0, 1 - t * 2.8);
+  brandingLineEl.style.opacity   = String(lineT);
+  brandingLineEl.style.transform = `scaleY(${lineT})`;
+
+  // ── Scroll arrow: fade out ──
+  arrowEl.style.opacity = String(Math.max(0, 0.55 * (1 - t * 3)));
+
+  // ── Video counter: fade out ──
+  vidCounterEl.style.opacity = String(Math.max(0, 1 - t * 4));
+
+  // ── Branding text → right, name → shrinks ──
+  if (scrollTargets) {
+    const { textDX, textDY, socialDX, socialDY, nameScale, isMobile } = scrollTargets;
+
+    brandingTextEl.style.transform =
+      `translateX(${(textDX * e).toFixed(2)}px) translateY(${(textDY * e).toFixed(2)}px)`;
+
+    if (!langSwitching) {
+      nameEl.style.transform = `scale(${lerp(1, nameScale, e).toFixed(4)})`;
+    }
+
+    if (isMobile) {
+      // Fade out cleanly — no translate glitch on narrow screens
+      socialEl.style.opacity   = String(Math.max(0, 1 - t * 2.2).toFixed(3));
+      socialEl.style.transform = `translateY(${(t * 12).toFixed(1)}px)`;
+    } else {
+      // Fade out gently as icons reach banner position
+      const socialOpacity = Math.max(0, 1 - Math.max(0, t - 0.7) / 0.3);
+      socialEl.style.opacity   = String(socialOpacity.toFixed(3));
+      socialEl.style.transform =
+        `translateX(${(socialDX * e).toFixed(2)}px) translateY(${(socialDY * e).toFixed(2)}px) scale(${lerp(1, 0.72, e).toFixed(4)})`;
+    }
+  }
+
+  scrollTicking = false;
+}
+
+window.addEventListener('scroll', () => {
+  if (!scrollTicking) { requestAnimationFrame(applyScroll); scrollTicking = true; }
+}, { passive: true });
+
+window.addEventListener('resize', () => { computeScrollTargets(); applyScroll(); });
+
+document.fonts.ready.then(() => { computeScrollTargets(); applyScroll(); });
+
+// ─────────────────────────────────────────────
+// LIGHT EFFECTS — canvas-based, screen compositing
+// ─────────────────────────────────────────────
+const lc     = document.getElementById('light-canvas');
+const lctx   = lc.getContext('2d');
+const heroEl2 = document.getElementById('hero');
+
+function resizeLC() {
+  lc.width  = heroEl2.offsetWidth;
+  lc.height = heroEl2.offsetHeight;
+}
+resizeLC();
+window.addEventListener('resize', resizeLC);
+
+const activeEffects = [];
+
+// ── Streak: bright line sweeping diagonally ──
+class Streak {
+  constructor() {
+    this.dur  = 0.28 + Math.random() * 0.32;
+    this.t    = 0;
+    this.y    = (0.1 + Math.random() * 0.8) * lc.height;
+    this.ang  = (Math.random() > 0.5 ? 1 : -1) * (6 + Math.random() * 20) * Math.PI / 180;
+    this.done = false;
+  }
+  draw(dt) {
+    this.t += dt;
+    const p = Math.min(1, this.t / this.dur);
+    if (p >= 1) { this.done = true; return; }
+    const op = p < 0.12 ? p / 0.12 : p > 0.82 ? (1 - p) / 0.18 : 1;
+    const prog = p < 0.5 ? 2*p*p : -1 + (4 - 2*p)*p;
+    const W = lc.width, cx = W * (-0.15 + prog * 1.3);
+    lctx.save();
+    lctx.translate(cx, this.y);
+    lctx.rotate(this.ang);
+    // soft halo
+    const halo = lctx.createLinearGradient(-W*.35, 0, W*.35, 0);
+    halo.addColorStop(0,   'transparent');
+    halo.addColorStop(0.3, `rgba(255,248,225,${0.09*op})`);
+    halo.addColorStop(0.5, `rgba(255,252,238,${0.16*op})`);
+    halo.addColorStop(0.7, `rgba(255,248,225,${0.09*op})`);
+    halo.addColorStop(1,   'transparent');
+    lctx.fillStyle = halo;
+    lctx.fillRect(-W*.35, -22, W*.7, 44);
+    // bright core
+    const core = lctx.createLinearGradient(-W*.28, 0, W*.28, 0);
+    core.addColorStop(0,    'transparent');
+    core.addColorStop(0.22, `rgba(255,253,245,${0.6*op})`);
+    core.addColorStop(0.5,  `rgba(255,255,255,${0.96*op})`);
+    core.addColorStop(0.78, `rgba(255,253,245,${0.6*op})`);
+    core.addColorStop(1,    'transparent');
+    lctx.fillStyle = core;
+    lctx.fillRect(-W*.28, -1.2, W*.56, 2.4);
+    lctx.restore();
+  }
+}
+
+// ── Bloom: expanding soft orb ──
+class Bloom {
+  constructor() {
+    this.dur  = 0.55 + Math.random() * 0.6;
+    this.t    = 0;
+    this.x    = (0.15 + Math.random() * 0.7) * lc.width;
+    this.y    = (0.15 + Math.random() * 0.7) * lc.height;
+    this.maxR = 70 + Math.random() * 130;
+    this.done = false;
+  }
+  draw(dt) {
+    this.t += dt;
+    const p = Math.min(1, this.t / this.dur);
+    if (p >= 1) { this.done = true; return; }
+    const op = p < 0.18 ? p / 0.18 : p > 0.55 ? (1 - p) / 0.45 : 1;
+    const r  = this.maxR * (0.08 + p * 0.92);
+    const { x, y } = this;
+    // outer glow
+    const og = lctx.createRadialGradient(x, y, 0, x, y, r * 2.8);
+    og.addColorStop(0,   `rgba(255,248,220,${0.10*op})`);
+    og.addColorStop(0.4, `rgba(255,235,180,${0.05*op})`);
+    og.addColorStop(1,   'transparent');
+    lctx.fillStyle = og;
+    lctx.beginPath(); lctx.arc(x, y, r*2.8, 0, Math.PI*2); lctx.fill();
+    // inner core
+    const ic = lctx.createRadialGradient(x, y, 0, x, y, r);
+    ic.addColorStop(0,    `rgba(255,255,250,${0.92*op})`);
+    ic.addColorStop(0.12, `rgba(255,252,235,${0.65*op})`);
+    ic.addColorStop(0.4,  `rgba(255,242,200,${0.22*op})`);
+    ic.addColorStop(0.75, `rgba(255,225,155,${0.05*op})`);
+    ic.addColorStop(1,    'transparent');
+    lctx.fillStyle = ic;
+    lctx.beginPath(); lctx.arc(x, y, r, 0, Math.PI*2); lctx.fill();
+  }
+}
+
+// ── Flare: source + anamorphic streak + ghost artifacts ──
+class Flare {
+  constructor() {
+    this.dur  = 0.85 + Math.random() * 0.9;
+    this.t    = 0;
+    this.sx   = (0.1 + Math.random() * 0.8) * lc.width;
+    this.sy   = (0.05 + Math.random() * 0.45) * lc.height;
+    this.done = false;
+  }
+  draw(dt) {
+    this.t += dt;
+    const p = Math.min(1, this.t / this.dur);
+    if (p >= 1) { this.done = true; return; }
+    const op = p < 0.14 ? p / 0.14 : p > 0.72 ? (1 - p) / 0.28 : 1;
+    const { sx, sy } = this;
+    const W = lc.width, H = lc.height;
+    // source glow
+    const sg = lctx.createRadialGradient(sx, sy, 0, sx, sy, 70);
+    sg.addColorStop(0,    `rgba(255,255,252,${0.96*op})`);
+    sg.addColorStop(0.07, `rgba(255,252,232,${0.72*op})`);
+    sg.addColorStop(0.28, `rgba(255,238,185,${0.22*op})`);
+    sg.addColorStop(0.65, `rgba(255,215,130,${0.06*op})`);
+    sg.addColorStop(1,    'transparent');
+    lctx.fillStyle = sg;
+    lctx.beginPath(); lctx.arc(sx, sy, 70, 0, Math.PI*2); lctx.fill();
+    // anamorphic streak
+    lctx.save();
+    lctx.translate(sx, sy);
+    const sk = lctx.createLinearGradient(-W*.65, 0, W*.65, 0);
+    sk.addColorStop(0,    'transparent');
+    sk.addColorStop(0.22, `rgba(210,228,255,${0.07*op})`);
+    sk.addColorStop(0.44, `rgba(228,242,255,${0.28*op})`);
+    sk.addColorStop(0.5,  `rgba(245,252,255,${0.48*op})`);
+    sk.addColorStop(0.56, `rgba(228,242,255,${0.28*op})`);
+    sk.addColorStop(0.78, `rgba(210,228,255,${0.07*op})`);
+    sk.addColorStop(1,    'transparent');
+    lctx.fillStyle = sk;
+    lctx.fillRect(-W*.65, -2, W*1.3, 4);
+    lctx.restore();
+    // ghost artifacts along axis through centre
+    const cx = W/2, cy = H/2;
+    const dx = cx - sx, dy = cy - sy;
+    const ghosts = [
+      { d:1.10, r:20, c:[255,200, 90], a:0.38 },
+      { d:1.55, r:13, c:[195,175,255], a:0.30 },
+      { d:1.95, r:32, c:[175,215,255], a:0.18 },
+      { d:2.55, r: 9, c:[255,238,195], a:0.34 },
+    ];
+    for (const g of ghosts) {
+      const gx = sx + dx*g.d, gy = sy + dy*g.d;
+      const [r,gr,b] = g.c;
+      const gg = lctx.createRadialGradient(gx, gy, 0, gx, gy, g.r);
+      gg.addColorStop(0,   `rgba(${r},${gr},${b},${g.a*op})`);
+      gg.addColorStop(0.5, `rgba(${r},${gr},${b},${g.a*.35*op})`);
+      gg.addColorStop(1,   'transparent');
+      lctx.fillStyle = gg;
+      lctx.beginPath(); lctx.arc(gx, gy, g.r, 0, Math.PI*2); lctx.fill();
+      lctx.strokeStyle = `rgba(${r},${gr},${b},${g.a*.25*op})`;
+      lctx.lineWidth = 1.2;
+      lctx.beginPath(); lctx.arc(gx, gy, g.r*1.5, 0, Math.PI*2); lctx.stroke();
+    }
+  }
+}
+
+// ── Light leak: organic edge bleed ──
+class Leak {
+  constructor() {
+    this.dur    = 1.1 + Math.random() * 1.3;
+    this.t      = 0;
+    this.corner = Math.floor(Math.random() * 4);
+    this.done   = false;
+  }
+  draw(dt) {
+    this.t += dt;
+    const p = Math.min(1, this.t / this.dur);
+    if (p >= 1) { this.done = true; return; }
+    const op = p < 0.22 ? p / 0.22 : p > 0.72 ? (1 - p) / 0.28 : 1;
+    const W = lc.width, H = lc.height;
+    const corners = [[0,0],[W,0],[0,H],[W,H]];
+    const [cx, cy] = corners[this.corner];
+    const r = Math.hypot(W, H) * 0.78;
+    const lg = lctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    lg.addColorStop(0,    `rgba(255,235,145,${0.52*op})`);
+    lg.addColorStop(0.10, `rgba(255,195, 80,${0.38*op})`);
+    lg.addColorStop(0.25, `rgba(220,118, 38,${0.18*op})`);
+    lg.addColorStop(0.42, `rgba(155, 55, 18,${0.07*op})`);
+    lg.addColorStop(0.62, 'transparent');
+    lctx.fillStyle = lg;
+    lctx.fillRect(0, 0, W, H);
+  }
+}
+
+// ── Render loop ──
+let lcLast = 0;
+
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) {
+    lcLast = 0;             // reset so first frame after return doesn't use stale timestamp
+    activeEffects.length = 0; // clear anything that accumulated while hidden
+  }
+});
+
+function renderLC(ts) {
+  if (lcLast === 0) lcLast = ts; // first frame or after visibility reset
+  const dt = Math.min(0.05, (ts - lcLast) / 1000);
+  lcLast = ts;
+  lctx.clearRect(0, 0, lc.width, lc.height);
+  lctx.globalCompositeOperation = 'screen';
+  for (let i = activeEffects.length - 1; i >= 0; i--) {
+    activeEffects[i].draw(dt);
+    if (activeEffects[i].done) activeEffects.splice(i, 1);
+  }
+  requestAnimationFrame(renderLC);
+}
+requestAnimationFrame(renderLC);
+
+// ── Spawn ──
+const EFFECT_POOL = [Streak, Streak, Bloom, Bloom, Flare, Leak];
+function spawnEffect() {
+  if (document.hidden) return; // don't accumulate effects while tab is hidden
+  const Cls = EFFECT_POOL[Math.floor(Math.random() * EFFECT_POOL.length)];
+  activeEffects.push(new Cls());
+  if (Math.random() < 0.2) setTimeout(() => { if (!document.hidden) activeEffects.push(new Bloom()); }, 100 + Math.random()*280);
+}
+function scheduleEffect() {
+  setTimeout(() => { spawnEffect(); scheduleEffect(); }, 3200 + Math.random() * 8500);
+}
+setTimeout(scheduleEffect, 1600);
+
+document.addEventListener('DOMContentLoaded', () => {
+  loop().catch(err => console.error('Playback error:', err));
+});
+
+// ─────────────────────────────────────────────
+// STORY MODAL
+// ─────────────────────────────────────────────
+const storyModal = document.getElementById('story-modal');
+
+const STORIES = {
+  1: {
+    title:   'השמיים כרגע כחולים',
+    author:  'אורי בורשטיין',
+    image:   'freepik_a-breathtaking-ultrawide-_2763376983.png',
+    bodyId:  'story-body-1',
+    coverId: 'cover-readtime-label'
+  },
+  2: {
+    title:   'עולמות נחרבים ונבנים ברגע זה ממש',
+    author:  'אורי בורשטיין',
+    image:   'story2.png',
+    bodyId:  'story-body-2',
+    coverId: 'cover-readtime-label-2'
+  },
+};
+
+// Pre-calculate and display reading times on cover cards
+Object.values(STORIES).forEach(s => {
+  const tmpl  = document.getElementById(s.bodyId);
+  const words = tmpl ? (tmpl.innerText || tmpl.textContent).trim().split(/\s+/).length : 0;
+  const mins  = Math.ceil(words / 200);
+  const lbl   = document.getElementById(s.coverId);
+  if (lbl) lbl.textContent = `${mins} דק׳`;
+});
+
+function openStory(id) {
+  const story  = STORIES[id];
+  const tmpl   = document.getElementById(story.bodyId);
+  const heroEl = document.getElementById('story-modal-hero');
+  const titleEl= document.getElementById('story-modal-title');
+  const bodyEl = document.getElementById('story-modal-body');
+  const byAuthorEl = document.querySelector('#story-modal-byline span');
+  const authorLbl  = document.querySelector('.modal-author-label');
+  const readLbl    = document.getElementById('story-read-time-label');
+
+  // populate title + author
+  titleEl.textContent = story.title;
+  if (byAuthorEl)  byAuthorEl.textContent  = story.author;
+  if (authorLbl)   authorLbl.textContent   = story.author;
+
+  // hero image
+  if (story.image) {
+    heroEl.querySelector('img').src = story.image;
+    heroEl.style.display = '';
+    storyModal.classList.remove('no-hero');
+  } else {
+    storyModal.classList.add('no-hero');
+  }
+
+  // body content
+  bodyEl.innerHTML = tmpl ? tmpl.innerHTML : '';
+
+  // reading time
+  const words = bodyEl.innerText.trim().split(/\s+/).length;
+  const mins  = Math.ceil(words / 200);
+  if (readLbl) readLbl.textContent = `${mins} דקות קריאה`;
+
+  storyModal.classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('story-modal-scroll').scrollTop = 0;
+}
+function closeStory() {
+  storyModal.classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+let storyLightMode = false;
+function toggleStoryTheme() {
+  storyLightMode = !storyLightMode;
+  storyModal.classList.toggle('light-mode', storyLightMode);
+  const icon = document.getElementById('story-theme-icon');
+  if (storyLightMode) {
+    // show moon → switch to dark
+    icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3a7 7 0 0 0 9.79 9.79z"/>';
+  } else {
+    // show sun → switch to light
+    icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+  }
+}
+
+// Close on Escape key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    closeStory();
+    if (document.getElementById('stories-search-wrap').style.display !== 'none') toggleSearch(false);
+  }
+});
+
+
+// ─────────────────────────────────────────────
+// FILTER & SEARCH
+// ─────────────────────────────────────────────
+let activeFilter = 'הכל';
+
+document.querySelectorAll('.filter-btn[data-filter]').forEach(btn => {
+  btn.addEventListener('click', () => {
+    activeFilter = btn.dataset.filter;
+    document.querySelectorAll('.filter-btn[data-filter]').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    applyFilter();
+    // clear search when switching category
+    const searchInput = document.getElementById('stories-search');
+    if (searchInput) searchInput.value = '';
+  });
+});
+
+function applyFilter(searchTerm = '') {
+  const term = searchTerm.trim().toLowerCase();
+  document.querySelectorAll('.story-file-wrapper').forEach(card => {
+    const cat   = card.dataset.category || '';
+    const title = (card.dataset.title || '').toLowerCase();
+    const matchCat    = activeFilter === 'הכל' || cat === activeFilter;
+    const matchSearch = !term || title.includes(term) || cat.includes(term);
+    card.classList.toggle('filtered-out', !(matchCat && matchSearch));
+  });
+}
+
+function searchStories(val) {
+  applyFilter(val);
+}
+
+let searchOpen = false;
+function toggleSearch(forceClose) {
+  searchOpen = forceClose === false ? false : !searchOpen;
+  const wrap = document.getElementById('stories-search-wrap');
+  const btn  = document.querySelector('.filter-btn.filter-search');
+  wrap.style.display = searchOpen ? 'block' : 'none';
+  btn.classList.toggle('active', searchOpen);
+  if (searchOpen) {
+    setTimeout(() => document.getElementById('stories-search').focus(), 50);
+  } else {
+    document.getElementById('stories-search').value = '';
+    applyFilter();
+  }
+}
+</script>
+</body>
+</html>
