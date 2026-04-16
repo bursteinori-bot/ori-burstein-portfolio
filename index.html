@@ -475,25 +475,25 @@
     }
 
     #about-statement {
-      font-family: 'Inter', sans-serif;
-      font-size: clamp(1.3rem, 2.2vw, 1.75rem);
-      font-weight: 300;
-      line-height: 1.7;
+      font-family: 'Yarden', serif;
+      font-size: clamp(1.15rem, 2.2vw, 1.6rem);
+      font-weight: 400;
+      line-height: 1.8;
       color: var(--cream);
       margin-bottom: 28px;
     }
 
     #about-bio {
-      font-family: 'Inter', sans-serif;
-      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      font-family: 'Yarden', serif;
+      font-size: clamp(0.9rem, 1.5vw, 1.1rem);
       line-height: 2;
       color: var(--muted);
       margin-bottom: 28px;
     }
 
     #about-mid {
-      font-family: 'Inter', sans-serif;
-      font-size: clamp(1rem, 1.5vw, 1.15rem);
+      font-family: 'Yarden', serif;
+      font-size: clamp(0.9rem, 1.5vw, 1.1rem);
       line-height: 2;
       color: var(--muted);
       margin-bottom: 44px;
@@ -501,9 +501,9 @@
     }
 
     #about-closing {
-      font-family: 'Inter', sans-serif;
-      font-size: clamp(1.1rem, 1.7vw, 1.35rem);
-      font-weight: 300;
+      font-family: 'Yarden', serif;
+      font-size: clamp(1rem, 1.7vw, 1.25rem);
+      font-weight: 400;
       line-height: 1.8;
       color: rgba(238, 228, 210, 0.55);
       padding-top: 32px;
@@ -569,12 +569,18 @@
     @media (max-width: 700px) {
       #about-grid {
         grid-template-columns: 1fr;
-        gap: 40px;
+        gap: 32px;
+        /* photo second in DOM — show it first on mobile via order */
       }
+      #about-text-wrap { order: 2; }
       #about-photo {
+        order: 1;
         aspect-ratio: 1/1;
-        max-width: 240px;
+        max-width: 200px;
+        margin: 0 auto;
       }
+      .draft-note { display: none; }
+      #about-text-wrap { overflow: visible; }
     }
 
     /* ── STORIES GALLERY ── */
