@@ -1478,7 +1478,8 @@ const VIDEOS = [
   'freepik_subtle-cinematic-movement_2753403154.mp4',
 ];
 
-const CLIP_DURATION = 3500; // ms per clip
+const isMobileDetect = /Mobi|Android/i.test(navigator.userAgent);
+const CLIP_DURATION = isMobileDetect ? 5500 : 3500; // ms per clip (longer on mobile for buffering time)
 const LANG_SWITCH_EVERY = 2; // switch language every N clips
 
 // ─────────────────────────────────────────────
@@ -1562,7 +1563,7 @@ function sleep(ms) {
   });
 }
 
-const isMobileDevice = /Mobi|Android/i.test(navigator.userAgent);
+const isMobileDevice = isMobileDetect;
 const PRELOAD_TIMEOUT = isMobileDevice ? 12000 : 3000;
 
 // Begin loading idx into standby element (non-blocking)
@@ -1603,15 +1604,17 @@ async function swap() {
   const incoming = standby;
   const outgoing = current;
 
+  // Swap references FIRST (synchronous) so beginPreload called shortly after
+  // always captures the correct standby element.
+  [current, standby] = [standby, current];
+
   incoming.style.zIndex = '2';
   outgoing.style.zIndex = '1';
 
   // Start playing before fade-in so there's a live frame, not a black/still one
   await playEl(incoming);
-  dismissIntroFade(); // first video is playing — remove the intro overlay
+  dismissIntroFade();
   incoming.classList.add('active');
-
-  [current, standby] = [standby, current];
 
   setTimeout(() => {
     if (outgoing === standby) {
@@ -1641,25 +1644,24 @@ async function playSingle(durationMs) {
   }
   preloadedIdx = -1;
   preloadPromise = null;
-  swap();
+  await swap(); // await so current/standby are correct before we read them below
 
-  // Delay preload until the crossfade finishes (600ms) — loading a new src into
-  // the outgoing element while it's still fading out causes a visible glitch frame.
-  // 3500ms clip − 650ms delay still leaves 2850ms to preload, plenty for local files.
+  // Start preloading next video. On mobile give it the full clip duration to load;
+  // on desktop the 650ms delay avoids a glitch frame during the outgoing fade.
   setTimeout(() => {
     const upNext = pickNext();
     beginPreload(upNext);
-  }, 650);
+  }, isMobileDevice ? 0 : 650);
 
   if (durationMs !== undefined) {
     await sleep(durationMs);
   } else {
-    const playingEl = current; // capture before any async swap
+    const playingEl = current;
     await new Promise(resolve => {
       let done = false;
       const finish = () => { if (done) return; done = true; playingEl.removeEventListener('ended', finish); resolve(); };
       playingEl.addEventListener('ended', finish);
-      setTimeout(finish, 7000); // videos are max 5s, 7s is a safe ceiling
+      setTimeout(finish, 7000);
     });
   }
 }
