@@ -2150,6 +2150,13 @@ async function loadStories() {
     }
 
     applyFilter();
+
+    // Deep link — open story if URL hash matches a slug
+    const slug = location.hash.slice(1);
+    if (slug) {
+      const match = STORIES.find(s => s.slug === slug);
+      if (match) openStory(match.id);
+    }
   } catch(e) {
     console.error('Failed to load stories:', e);
   }
@@ -2179,6 +2186,7 @@ async function openStory(id) {
   }
 
   bodyEl.innerHTML = '<p style="opacity:0.4">טוען...</p>';
+  history.pushState({ storyId: id }, story.title, '#' + story.slug);
   storyModal.classList.add('open');
   document.body.style.overflow = 'hidden';
   document.getElementById('story-modal-scroll').scrollTop = 0;
@@ -2197,6 +2205,7 @@ async function openStory(id) {
 function closeStory() {
   storyModal.classList.remove('open');
   document.body.style.overflow = '';
+  history.pushState('', document.title, location.pathname);
 }
 
 let storyLightMode = false;
@@ -2218,6 +2227,18 @@ document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeStory();
     if (document.getElementById('stories-search-wrap').style.display !== 'none') toggleSearch(false);
+  }
+});
+
+// Browser back/forward
+window.addEventListener('popstate', () => {
+  const slug = location.hash.slice(1);
+  if (slug) {
+    const match = STORIES.find(s => s.slug === slug);
+    if (match) openStory(match.id);
+  } else {
+    storyModal.classList.remove('open');
+    document.body.style.overflow = '';
   }
 });
 
