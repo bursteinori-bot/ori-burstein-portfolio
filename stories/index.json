@@ -30,8 +30,7 @@
     "badge": "03",
     "teaser": "ממש רציתי לשנוא את פרק הפתיחה, אבל אי אפשר לקחת את העובדה שרותקתי למסך.",
     "seoKeywords": "אופוריה עונה שלוש, אופוריה עונה 3, ביקורת אופוריה, euphoria season 3 review, ביקורת מתגלגלת, זנדאיה, סם לוינסון",
-    "cover": null,
-    "coverBg": "linear-gradient(160deg, #0d0510 0%, #1a0d2e 45%, #0a1528 100%)",
+    "cover": "euphoria-s3-cover.jpg",
     "file": "stories/euphoria-s3-ep1.md",
     "episodes": [
       { "num": 1, "label": "פרק 1", "file": "stories/euphoria-s3-ep1.md" },
