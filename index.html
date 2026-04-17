@@ -88,25 +88,51 @@
         ]
       },
       {
-        "@type": "Review",
+        "@type": ["Review", "Article"],
         "@id": "https://oriburstein.com/#euphoria-s3-review",
-        "name": "אופוריה עונה שלוש — ביקורת מתגלגלת",
+        "headline": "אופוריה עונה שלוש (ביקורת מתגלגלת)",
+        "name": "אופוריה עונה שלוש (ביקורת מתגלגלת)",
+        "alternativeHeadline": "ביקורת אופוריה עונה 3 — פרק אחר פרק",
         "url": "https://oriburstein.com/#euphoria-season-3",
         "author": { "@id": "https://oriburstein.com/#person" },
+        "publisher": { "@id": "https://oriburstein.com/#person" },
         "inLanguage": "he",
         "datePublished": "2026-04-17",
-        "description": "ביקורת מתגלגלת פרק אחר פרק על העונה השלישית של אופוריה. על הצילום ב-35מ\"מ, הנס צימר, רו, וסם לוינסון.",
-        "keywords": "אופוריה עונה שלוש, אופוריה עונה 3, ביקורת אופוריה, euphoria season 3, ביקורת מתגלגלת, זנדאיה",
+        "dateModified": "2026-04-17",
+        "image": "https://oriburstein.com/euphoria-s3-cover.jpg",
+        "description": "ביקורת מתגלגלת על אופוריה עונה שלוש — פרק אחר פרק. על זנדאיה, סם לוינסון, הצילום בפילם 35מ\"מ של מרסל רב, ופסקול הנס צימר.",
+        "keywords": "אופוריה עונה שלוש, אופוריה עונה 3, ביקורת אופוריה, euphoria season 3 review, ביקורת מתגלגלת, זנדאיה, סם לוינסון, מרסל רב, הנס צימר, HBO, רו בנט",
+        "articleSection": "ביקורות",
+        "reviewBody": "ממש רציתי לשנוא את פרק הפתיחה של העונה השלישית, אבל אי אפשר לקחת את העובדה שרותקתי למסך. אופוריה זרקה אותנו חמש שנים קדימה אל מציאות קרה של מבוגרים שבורים.",
         "itemReviewed": {
           "@type": "TVSeason",
-          "name": "Euphoria — Season 3",
+          "name": "Euphoria Season 3",
+          "alternateName": "אופוריה עונה שלוש",
           "seasonNumber": 3,
+          "startDate": "2026-04-12",
           "partOfSeries": {
             "@type": "TVSeries",
             "name": "Euphoria",
-            "url": "https://www.hbo.com/euphoria"
+            "alternateName": "אופוריה",
+            "url": "https://www.hbo.com/euphoria",
+            "containsSeason": {
+              "@type": "TVSeason",
+              "seasonNumber": 3
+            }
           }
+        },
+        "mainEntityOfPage": {
+          "@type": "WebPage",
+          "@id": "https://oriburstein.com/#euphoria-season-3"
         }
+      },
+      {
+        "@type": "BreadcrumbList",
+        "itemListElement": [
+          { "@type": "ListItem", "position": 1, "name": "מושב אחד", "item": "https://oriburstein.com" },
+          { "@type": "ListItem", "position": 2, "name": "ביקורות", "item": "https://oriburstein.com/#reviews" },
+          { "@type": "ListItem", "position": 3, "name": "אופוריה עונה שלוש", "item": "https://oriburstein.com/#euphoria-season-3" }
+        ]
       },
       {
         "@type": "ShortStory",
@@ -2490,15 +2516,17 @@ async function openStory(id) {
   // Update meta tags for SEO / social sharing
   const storyUrl = 'https://oriburstein.com/#' + story.slug;
   const storyImg = story.cover ? 'https://oriburstein.com/' + story.cover : 'https://oriburstein.com/freepik_a-breathtaking-ultrawide-_2763376983.jpg';
-  document.title = story.title + ' — אורי בורשטיין';
-  document.querySelector('meta[name="description"]').content = story.teaser;
+  const seoDesc = story.seoDescription || story.teaser;
+  document.title = story.title + ' | אורי בורשטיין';
+  document.querySelector('meta[name="description"]').content = seoDesc;
   if (story.seoKeywords) document.querySelector('meta[name="keywords"]').content = story.seoKeywords;
-  document.querySelector('meta[property="og:title"]').content = story.title + ' — אורי בורשטיין';
-  document.querySelector('meta[property="og:description"]').content = story.teaser;
+  document.querySelector('meta[property="og:type"]').content = story.category === 'ביקורת' ? 'article' : 'website';
+  document.querySelector('meta[property="og:title"]').content = story.title + ' | אורי בורשטיין';
+  document.querySelector('meta[property="og:description"]').content = seoDesc;
   document.querySelector('meta[property="og:url"]').content = storyUrl;
   document.querySelector('meta[property="og:image"]').content = storyImg;
-  document.querySelector('meta[name="twitter:title"]').content = story.title + ' — אורי בורשטיין';
-  document.querySelector('meta[name="twitter:description"]').content = story.teaser;
+  document.querySelector('meta[name="twitter:title"]').content = story.title + ' | אורי בורשטיין';
+  document.querySelector('meta[name="twitter:description"]').content = seoDesc;
   document.querySelector('meta[name="twitter:image"]').content = storyImg;
   document.getElementById('canonical-link').href = storyUrl;
 
@@ -2567,6 +2595,8 @@ function closeStory() {
 
   // Restore default meta tags
   document.title = 'מושב אחד — אורי בורשטיין';
+  document.querySelector('meta[property="og:type"]').content = 'website';
+  document.querySelector('meta[name="keywords"]').content = 'אורי בורשטיין, מושב אחד, סיפורים קצרים, פרוזה עברית, ספרות עברית, קריאה, כתיבה יוצרת';
   document.querySelector('meta[name="description"]').content = 'מושב אחד — אורי בורשטיין. סיפורים קצרים, דיפטיכים וזיכרונות. תפסו כיסא, תצטרפו.';
   document.querySelector('meta[property="og:title"]').content = 'מושב אחד — אורי בורשטיין';
   document.querySelector('meta[property="og:description"]').content = 'סיפורים קצרים, דיפטיכים וזיכרונות. תפסו כיסא, תצטרפו.';
