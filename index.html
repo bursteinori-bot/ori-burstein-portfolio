@@ -1442,6 +1442,171 @@
       background: var(--line);
     }
 
+    /* ── HERO MAIL CTA ── */
+    #hero-cta {
+      position: absolute;
+      bottom: 38px;
+      left: 44px;
+      z-index: 10;
+      pointer-events: all;
+    }
+    #hero-cta a {
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 3px;
+      text-decoration: none;
+      color: rgba(255,255,255,0.32);
+      transition: color 0.4s ease;
+    }
+    #hero-cta a:hover { color: rgba(255,255,255,0.88); }
+    .hero-cta-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.58rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+    }
+    .hero-cta-action {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.05rem;
+      font-style: italic;
+      font-weight: 300;
+      letter-spacing: 0.04em;
+    }
+
+    /* ── CONTACT + NEWSLETTER ── */
+    #contact-section {
+      border-top: 1px solid var(--line);
+      padding-top: 90px;
+      padding-bottom: 90px;
+    }
+    #contact-inner {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 72px;
+      align-items: start;
+      margin-top: 52px;
+    }
+    #contact-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.15;
+      color: var(--cream);
+      margin: 0 0 14px;
+    }
+    #contact-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      letter-spacing: 0.04em;
+      line-height: 1.7;
+      color: var(--muted);
+      margin: 0 0 30px;
+    }
+    #contact-mail-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 11px 22px;
+      background: var(--cream);
+      color: #f5efe6;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-decoration: none;
+      border-radius: 2px;
+      transition: opacity 0.25s;
+    }
+    #contact-mail-btn:hover { opacity: 0.78; }
+    #contact-mail-btn svg { width: 13px; height: 13px; fill: currentColor; flex-shrink: 0; }
+    #page-content #contact-mail-btn {
+      background: rgba(22,16,8,0.88);
+      color: #f5efe6;
+    }
+
+    .newsletter-divider {
+      width: 1px;
+      background: var(--line);
+      align-self: stretch;
+      display: none; /* shown by grid gap */
+    }
+    #newsletter-label {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--faint);
+      margin: 0 0 14px;
+    }
+    #newsletter-heading {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.5rem, 3vw, 2.1rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.2;
+      color: var(--cream);
+      margin: 0 0 10px;
+    }
+    #newsletter-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      line-height: 1.7;
+      letter-spacing: 0.03em;
+      color: var(--muted);
+      margin: 0 0 24px;
+    }
+    #newsletter-form {
+      display: flex;
+      gap: 0;
+      max-width: 380px;
+    }
+    #newsletter-email {
+      flex: 1;
+      padding: 11px 16px;
+      background: transparent;
+      border: 1px solid var(--line);
+      border-right: none;
+      border-radius: 2px 0 0 2px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.78rem;
+      letter-spacing: 0.04em;
+      color: var(--cream);
+      outline: none;
+      transition: border-color 0.25s;
+    }
+    #newsletter-email::placeholder { color: var(--faint); }
+    #newsletter-email:focus { border-color: var(--muted); }
+    #newsletter-btn {
+      padding: 11px 18px;
+      background: var(--cream);
+      color: #f5efe6;
+      border: 1px solid var(--cream);
+      border-radius: 0 2px 2px 0;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.68rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: opacity 0.25s;
+    }
+    #newsletter-btn:hover { opacity: 0.78; }
+    #page-content #newsletter-email { color: rgba(22,16,8,0.85); border-color: rgba(22,16,8,0.18); }
+    #page-content #newsletter-email::placeholder { color: rgba(22,16,8,0.28); }
+    #page-content #newsletter-email:focus { border-color: rgba(22,16,8,0.45); }
+    #page-content #newsletter-btn { background: rgba(22,16,8,0.88); border-color: rgba(22,16,8,0.88); color: #f5efe6; }
+    #newsletter-thanks {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: none;
+      margin-top: 14px;
+    }
+
     /* ── FOOTER ── */
     footer {
       text-align: center;
@@ -1457,6 +1622,9 @@
     @media (max-width: 700px) {
       .section { padding: 72px 24px; }
       #scroll-arrow { bottom: 20px; }
+      #hero-cta { left: 20px; bottom: 22px; }
+      #contact-inner { grid-template-columns: 1fr; gap: 52px; }
+      #newsletter-form { max-width: 100%; }
 
       /* Mobile branding: name top-right, tagline below it, social bottom-right vertical */
       #branding {
@@ -1511,6 +1679,13 @@
 
   <div id="scroll-arrow" onclick="document.getElementById('content').scrollIntoView({behavior:'smooth'})">
     <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+  </div>
+
+  <div id="hero-cta">
+    <a href="mailto:bursteinori@gmail.com">
+      <span class="hero-cta-label">got something on your mind?</span>
+      <span class="hero-cta-action">slide into my inbox ↗</span>
+    </a>
   </div>
 
   <div id="branding">
@@ -1593,6 +1768,34 @@
       <p id="about-closing">זה המקום שלי להניח את הראש ולנוח רגע.<br>תפסו כיסא, תצטרפו.<span class="draft-cursor"></span></p>
     </div>
     <img id="about-photo" src="70EBCC29-8198-4A1C-A04F-7E18E85DA6ED_4_5005_c.jpeg" alt="Ori Burstein">
+  </div>
+</section>
+
+<!-- CONTACT + NEWSLETTER -->
+<section id="contact-section" class="section" dir="ltr">
+  <div class="section-label">get in touch</div>
+  <div id="contact-inner">
+
+    <div id="contact-cta">
+      <h3 id="contact-heading">got a story,<br>a rant, or just<br>wanna say hi?</h3>
+      <p id="contact-sub">pitches, collabs, random thoughts —<br>all welcome. don't be a stranger.</p>
+      <a href="mailto:bursteinori@gmail.com" id="contact-mail-btn">
+        <svg viewBox="0 0 24 24"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
+        mail me
+      </a>
+    </div>
+
+    <div id="newsletter-wrap">
+      <p id="newsletter-label">newsletter</p>
+      <h4 id="newsletter-heading">stay in<br>the loop</h4>
+      <p id="newsletter-sub">no spam. just stories, when they're ready.<br>drop your email and i'll do the rest.</p>
+      <form id="newsletter-form" onsubmit="subscribeNewsletter(event)">
+        <input type="email" id="newsletter-email" placeholder="your@email.com" required autocomplete="email">
+        <button type="submit" id="newsletter-btn">subscribe ↗</button>
+      </form>
+      <p id="newsletter-thanks">you're in. talk soon. ✓</p>
+    </div>
+
   </div>
 </section>
 
@@ -2537,6 +2740,18 @@ async function loadStories() {
   } catch(e) {
     console.error('Failed to load stories:', e);
   }
+}
+
+function subscribeNewsletter(e) {
+  e.preventDefault();
+  const email = document.getElementById('newsletter-email').value.trim();
+  if (!email) return;
+  document.getElementById('newsletter-form').style.display = 'none';
+  document.getElementById('newsletter-thanks').style.display = 'block';
+  // open mailto as a polite fallback so the email isn't lost
+  setTimeout(() => {
+    window.location.href = `mailto:bursteinori@gmail.com?subject=Newsletter signup&body=Please add me to your list: ${encodeURIComponent(email)}`;
+  }, 400);
 }
 
 function closeProject() {
