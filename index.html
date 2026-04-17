@@ -610,6 +610,9 @@
       padding-top: 32px;
       border-top: 1px solid var(--line);
     }
+    #page-content #about-closing {
+      color: rgba(22, 16, 8, 0.55);
+    }
 
     /* ── Draft / manuscript marks ── */
     .draft-highlight {
@@ -1330,6 +1333,25 @@
     #story-modal.light-mode a.review-link:hover { color: rgba(60,30,8,0.95); }
     #story-modal.light-mode .review-rating span { color: rgba(60,35,10,0.4); border-color: rgba(60,35,10,0.15); }
 
+    /* open-in-new-tab button — only in project mode */
+    #project-newtab-btn {
+      display: none;
+      background: none;
+      border: none;
+      color: rgba(200,185,160,0.45);
+      cursor: pointer;
+      padding: 8px;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      transition: color 0.25s, background 0.25s;
+      text-decoration: none;
+    }
+    #project-newtab-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+    #project-newtab-btn:hover { color: var(--cream); background: rgba(200,185,160,0.08); }
+    #story-modal.project-mode #project-newtab-btn { display: flex; }
+    #story-modal.project-mode #story-theme-btn { display: none; }
+
     /* theme toggle button */
     #story-theme-btn {
       background: none;
@@ -1838,6 +1860,10 @@
   <div id="story-modal-header">
     <span class="modal-author-label">אורי בורשטיין</span>
     <div style="display:flex;gap:4px;align-items:center;">
+      <!-- open project in new tab (shown only in project-mode) -->
+      <a id="project-newtab-btn" href="#" target="_blank" rel="noopener" aria-label="פתח בטאב חדש">
+        <svg viewBox="0 0 24 24"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      </a>
       <!-- sun / moon toggle -->
       <button id="story-theme-btn" onclick="toggleStoryTheme()" aria-label="החלף תצוגה">
         <svg id="story-theme-icon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
@@ -2791,6 +2817,7 @@ async function openStory(id) {
     if (authorLbl)  authorLbl.textContent  = 'אורי בורשטיין';
     storyModal.classList.remove('has-episodes', 'light-mode');
     storyModal.classList.add('no-hero', 'project-mode');
+    document.getElementById('project-newtab-btn').href = story.projectUrl;
     document.getElementById('story-modal-body').innerHTML =
       `<iframe id="project-embed-iframe" src="${story.projectUrl}" title="${story.title}"></iframe>`;
     storyModal.classList.add('open');
