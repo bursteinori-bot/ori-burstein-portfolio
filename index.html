@@ -1040,6 +1040,48 @@
     }
 
 
+    /* ── PROJECT OVERLAY ── */
+    #project-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 1100;
+      background: #f5f0e6;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.35s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    #project-overlay.open {
+      opacity: 1;
+      pointer-events: all;
+    }
+    #project-overlay-close {
+      position: absolute;
+      top: 14px;
+      left: 18px;
+      z-index: 10;
+      width: 38px; height: 38px;
+      background: rgba(255,255,255,0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255,255,255,0.85);
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+      transition: background 0.2s;
+    }
+    #project-overlay-close:hover { background: rgba(255,255,255,0.95); }
+    #project-overlay-close svg {
+      width: 16px; height: 16px;
+      stroke: #2c2825; stroke-width: 1.8; fill: none;
+    }
+    #project-iframe {
+      width: 100%; height: 100%;
+      border: none;
+      flex: 1;
+    }
+
     /* ── STORY MODAL ── */
     #story-modal {
       position: fixed;
@@ -1509,6 +1551,7 @@
     <button class="filter-btn active" data-filter="הכל">הכל</button>
     <button class="filter-btn" data-filter="סיפור קצר">סיפור קצר</button>
     <button class="filter-btn" data-filter="ביקורת">ביקורות</button>
+    <button class="filter-btn" data-filter="פרויקט">פרויקטים</button>
     <span class="filter-sep"></span>
     <button class="filter-btn filter-search" onclick="toggleSearch()">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -1590,6 +1633,14 @@
       <div id="story-modal-body"></div>
     </div>
   </div>
+</div>
+
+<!-- ── PROJECT OVERLAY ── -->
+<div id="project-overlay">
+  <button id="project-overlay-close" onclick="closeProject()" aria-label="סגור">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  </button>
+  <iframe id="project-iframe" src="" title="פרויקט"></iframe>
 </div>
 
 <!-- ── STORY CONTENT TEMPLATES (hidden) ── removed, stories loaded from /stories/ ──
@@ -2444,7 +2495,7 @@ function buildCard(s, idx) {
         <div class="story-cover-divider"></div>
         <p class="story-cover-teaser">${s.teaser || ''}</p>
       </div>
-      <span class="story-read-hint">קרא</span>
+      <span class="story-read-hint">${s.projectUrl ? 'צפה' : 'קרא'}</span>
     </div>`;
   return el;
 }
@@ -2462,7 +2513,8 @@ async function loadStories() {
       const card = buildCard(s, i);
       gallery.appendChild(card);
 
-      // fetch word count for reading time badge
+      // fetch word count for reading time badge (skip for projects)
+      if (!s.file) continue;
       fetch(s.file)
         .then(r => r.text())
         .then(md => {
@@ -2487,9 +2539,29 @@ async function loadStories() {
   }
 }
 
+function closeProject() {
+  const overlay = document.getElementById('project-overlay');
+  const iframe  = document.getElementById('project-iframe');
+  overlay.classList.remove('open');
+  document.body.style.overflow = '';
+  history.pushState({}, 'מושב אחד', '#');
+  setTimeout(() => { iframe.src = ''; }, 350);
+}
+
 async function openStory(id) {
   const story = STORIES.find(s => s.id === id);
   if (!story) return;
+
+  // Projects open in a full-screen iframe overlay
+  if (story.projectUrl) {
+    history.pushState({ storyId: id }, story.title, '#' + story.slug);
+    document.title = story.title + ' | אורי בורשטיין';
+    const iframe = document.getElementById('project-iframe');
+    iframe.src = story.projectUrl;
+    document.getElementById('project-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    return;
+  }
 
   const heroEl     = document.getElementById('story-modal-hero');
   const titleEl    = document.getElementById('story-modal-title');
@@ -2626,6 +2698,7 @@ function toggleStoryTheme() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeStory();
+    closeProject();
     if (document.getElementById('stories-search-wrap').style.display !== 'none') toggleSearch(false);
   }
 });
@@ -2638,6 +2711,7 @@ window.addEventListener('popstate', () => {
     if (match) openStory(match.id);
   } else {
     storyModal.classList.remove('open');
+    document.getElementById('project-overlay').classList.remove('open');
     document.body.style.overflow = '';
   }
 });

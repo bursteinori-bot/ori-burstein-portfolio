@@ -22,6 +22,17 @@
     "file": "stories/olamot-nechravim.md"
   },
   {
+    "id": 4,
+    "slug": "stop-to-look",
+    "title": "לעצור להסתכל",
+    "category": "פרויקט",
+    "tabLabel": "ד׳",
+    "badge": "04",
+    "teaser": "סיפור בחמישה שוטים על נער שקוע בטלפון — ומה קורה כשהוא סוף סוף מרים את הראש.",
+    "cover": "https://drive.google.com/thumbnail?id=1ouo1NaCSv_dsNcNMCGujJ6bmbTLMibn6&sz=w800",
+    "projectUrl": "projects/stoptolook.html"
+  },
+  {
     "id": 3,
     "slug": "euphoria-season-3",
     "title": "אופוריה עונה שלוש (ביקורת מתגלגלת)",

@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>לעצור להסתכל | פרויקט צילום מאת אורי בורשטיין</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Google Fonts (Assistant) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="">
+    <link href="https://fonts.googleapis.com/css2?family=Assistant:wght@200;300;400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Assistant', 'sans-serif'],
+                    },
+                    colors: {
+                        theme: {
+                            bg: '#f5f0e6',
+                            blob1: '#e8dfd1',
+                            blob2: '#f0e6d8',
+                            text: '#2c2825',
+                            accent: '#1a1816',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: #f5f0e6;
+            color: #2c2825;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        ::selection {
+            background-color: #d6cfc4;
+            color: #1a1816;
+        }
+
+        .bg-blobs {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .blob-1 {
+            position: absolute;
+            top: -10%; right: -5%;
+            width: 50vw; height: 50vw;
+            background: #e8dfd1;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.6;
+        }
+        .blob-2 {
+            position: absolute;
+            bottom: -20%; left: -10%;
+            width: 60vw; height: 60vw;
+            background: #ece3d5;
+            border-radius: 50%;
+            filter: blur(100px);
+            opacity: 0.7;
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 1.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            opacity: 0;
+            transform: translateY(40px);
+        }
+
+        @keyframes fadeInUp {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .delay-100 { animation-delay: 0.15s; }
+        .delay-200 { animation-delay: 0.3s; }
+        .delay-300 { animation-delay: 0.45s; }
+        .delay-400 { animation-delay: 0.6s; }
+
+        @keyframes bounceWave {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-8px); }
+        }
+        .bounce-ball {
+            animation: bounceWave 4s infinite ease-in-out;
+        }
+        .thumbs-container:hover .bounce-ball {
+            animation-play-state: paused;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.4);
+            backdrop-filter: blur(24px);
+            -webkit-backdrop-filter: blur(24px);
+            border: 1px solid rgba(255, 255, 255, 0.6);
+            box-shadow: 0 10px 40px -10px rgba(0,0,0,0.06);
+            border-radius: 1.5rem;
+            transition: transform 0.5s ease, box-shadow 0.5s ease;
+        }
+        .shot-section.is-visible .glass-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 50px -10px rgba(0,0,0,0.1);
+        }
+
+        .img-wrapper {
+            position: relative;
+            overflow: hidden;
+            border-radius: 0.75rem;
+            transform: translateY(30px);
+            opacity: 0;
+            transition: transform 1.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 1.6s ease;
+            box-shadow: 0 20px 40px -15px rgba(0,0,0,0.08);
+        }
+
+        .img-wrapper::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: #f5f0e6;
+            transition: transform 1.4s cubic-bezier(0.65, 0, 0.35, 1);
+            transform-origin: bottom;
+            z-index: 10;
+        }
+
+        .img-wrapper img {
+            transition: transform 2s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: scale(1.08);
+        }
+
+        .text-wrapper {
+            transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1) 0.3s;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        .number-node {
+            transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            transform: translate(50%, -50%) scale(0.8);
+            background-color: rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(8px);
+            color: #a39c94;
+            border: 1px solid rgba(255,255,255,0.8);
+        }
+
+        @media (max-width: 767px) {
+            .number-node { transform: translate(50%, 0) scale(0.8); }
+        }
+
+        .shot-section.is-visible .img-wrapper {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .shot-section.is-visible .img-wrapper::after {
+            transform: scaleY(0);
+        }
+        .shot-section.is-visible .img-wrapper img {
+            transform: scale(1);
+        }
+        .shot-section.is-visible .text-wrapper {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        @media (min-width: 768px) {
+            .shot-section.is-visible .number-node {
+                background-color: #2c2825;
+                color: #f5f0e6;
+                border-color: #2c2825;
+                transform: translate(50%, -50%) scale(1);
+                box-shadow: 0 10px 20px -5px rgba(44,40,37,0.3);
+            }
+        }
+        @media (max-width: 767px) {
+            .shot-section.is-visible .number-node {
+                background-color: #2c2825;
+                color: #f5f0e6;
+                border-color: #2c2825;
+                transform: translate(50%, 0) scale(1);
+                box-shadow: 0 10px 20px -5px rgba(44,40,37,0.3);
+            }
+        }
+
+        .thumb-nav {
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .thumb-nav:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 30px -5px rgba(0, 0, 0, 0.15);
+        }
+
+        .img-loaded {
+            opacity: 1 !important;
+            transition: opacity 0.8s ease-in-out;
+        }
+
+        /* Back button (shown when opened in iframe context) */
+        #back-btn {
+            display: none;
+            position: fixed;
+            top: 18px;
+            left: 18px;
+            z-index: 100;
+            background: rgba(255,255,255,0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255,255,255,0.8);
+            border-radius: 50px;
+            padding: 8px 18px;
+            font-family: 'Assistant', sans-serif;
+            font-size: 0.85rem;
+            color: #2c2825;
+            cursor: pointer;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.2s;
+        }
+        #back-btn:hover { background: rgba(255,255,255,0.95); }
+    </style>
+</head>
+<body class="antialiased font-sans">
+
+    <div class="bg-blobs">
+        <div class="blob-1"></div>
+        <div class="blob-2"></div>
+    </div>
+
+    <header class="min-h-[90vh] md:min-h-screen flex flex-col items-center justify-center text-center px-4 pt-16 md:pt-10 pb-20 relative">
+        <div class="max-w-4xl mx-auto w-full mt-8 md:mt-0">
+            <h1 class="text-6xl sm:text-7xl md:text-[8rem] font-light mb-6 tracking-tight text-theme-accent fade-in-up leading-none">
+                לעצור<br class="md:hidden"> להסתכל
+            </h1>
+
+            <div class="w-12 h-[2px] bg-theme-accent mx-auto mb-8 fade-in-up delay-100 opacity-60"></div>
+
+            <p class="text-2xl sm:text-3xl md:text-4xl text-theme-text font-light mb-12 fade-in-up delay-200 leading-relaxed max-w-2xl mx-auto px-2 tracking-wide opacity-80">
+                סיפור בחמישה שוטים
+            </p>
+
+            <div class="mb-20 fade-in-up delay-300">
+                <span class="text-theme-text font-medium text-sm md:text-base tracking-[0.2em] uppercase bg-white/40 backdrop-blur-md px-6 py-2 rounded-full border border-white/50 shadow-sm">
+                    צילום // אורי בורשטיין
+                </span>
+            </div>
+
+            <div class="fade-in-up delay-400 w-full mt-4">
+                <div class="flex flex-wrap justify-center gap-4 md:gap-8 max-w-[240px] md:max-w-none mx-auto thumbs-container">
+
+                    <div class="bounce-ball" style="animation-delay: 0s;">
+                        <a href="#shot-1" class="thumb-nav relative block w-14 h-14 md:w-24 md:h-24 overflow-hidden cursor-pointer group bg-stone-200 rounded-full border-[3px] md:border-[4px] border-white shadow-md">
+                            <img src="https://drive.google.com/thumbnail?id=1ouo1NaCSv_dsNcNMCGujJ6bmbTLMibn6&sz=w400" class="w-full h-full object-cover" alt="1">
+                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity duration-500 group-hover:opacity-0">
+                                <span class="text-white font-medium text-lg md:text-2xl drop-shadow-md">1</span>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="bounce-ball" style="animation-delay: 0.4s;">
+                        <a href="#shot-2" class="thumb-nav relative block w-14 h-14 md:w-24 md:h-24 overflow-hidden cursor-pointer group bg-stone-200 rounded-full border-[3px] md:border-[4px] border-white shadow-md">
+                            <img src="https://drive.google.com/thumbnail?id=1LtwdSsFbGOfN-cPbRC-Udj8WCQL9BgO5&sz=w400" class="w-full h-full object-cover" alt="2" loading="lazy">
+                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity duration-500 group-hover:opacity-0">
+                                <span class="text-white font-medium text-lg md:text-2xl drop-shadow-md">2</span>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="bounce-ball" style="animation-delay: 0.8s;">
+                        <a href="#shot-3" class="thumb-nav relative block w-14 h-14 md:w-24 md:h-24 overflow-hidden cursor-pointer group bg-stone-200 rounded-full border-[3px] md:border-[4px] border-white shadow-md">
+                            <img src="https://drive.google.com/thumbnail?id=1G2ZvcRNPIdWt9TxQrC3K9QY7iRXQ5HCj&sz=w400" class="w-full h-full object-cover" alt="3" loading="lazy">
+                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity duration-500 group-hover:opacity-0">
+                                <span class="text-white font-medium text-lg md:text-2xl drop-shadow-md">3</span>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="bounce-ball" style="animation-delay: 1.2s;">
+                        <a href="#shot-4" class="thumb-nav relative block w-14 h-14 md:w-24 md:h-24 overflow-hidden cursor-pointer group bg-stone-200 rounded-full border-[3px] md:border-[4px] border-white shadow-md">
+                            <img src="https://drive.google.com/thumbnail?id=1VuXpiyrTHepwqm5TW8Yt20Iuh7uLBq_d&sz=w400" class="w-full h-full object-cover" alt="4" loading="lazy">
+                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity duration-500 group-hover:opacity-0">
+                                <span class="text-white font-medium text-lg md:text-2xl drop-shadow-md">4</span>
+                            </div>
+                        </a>
+                    </div>
+
+                    <div class="bounce-ball" style="animation-delay: 1.6s;">
+                        <a href="#shot-5" class="thumb-nav relative block w-14 h-14 md:w-24 md:h-24 overflow-hidden cursor-pointer group bg-stone-200 rounded-full border-[3px] md:border-[4px] border-white shadow-md">
+                            <img src="https://drive.google.com/thumbnail?id=1LE_FDhTyDdh4DhTd5JMxmFPDlAk1WcBL&sz=w400" class="w-full h-full object-cover" alt="5" loading="lazy">
+                            <div class="absolute inset-0 bg-black/20 flex items-center justify-center transition-opacity duration-500 group-hover:opacity-0">
+                                <span class="text-white font-medium text-lg md:text-2xl drop-shadow-md">5</span>
+                            </div>
+                        </a>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <div class="absolute bottom-8 flex flex-col items-center gap-3 fade-in-up delay-400 text-theme-text opacity-50 hover:opacity-100 transition-opacity cursor-pointer" onclick="window.location.href='#shot-1'">
+            <span class="text-[0.65rem] tracking-[0.2em] uppercase font-semibold">גלול מטה</span>
+            <svg class="w-5 h-5 animate-bounce" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M19 14l-7 7m0 0l-7-7m7 7V3"></path>
+            </svg>
+        </div>
+    </header>
+
+    <main id="main-content" class="w-full mx-auto pb-40 relative z-10">
+
+        <div class="absolute top-0 bottom-0 right-6 md:right-1/2 md:translate-x-1/2 w-[1.5px] bg-theme-text opacity-10 z-0"></div>
+        <div id="drawing-line" class="absolute top-0 right-6 md:right-1/2 md:translate-x-1/2 w-[1.5px] bg-theme-text z-0 transition-all duration-75 ease-out shadow-[0_0_8px_rgba(44,40,37,0.3)]" style="height: 0px;"></div>
+
+        <div class="max-w-7xl mx-auto w-full pt-10">
+
+            <!-- shot 1 -->
+            <section id="shot-1" class="shot-section relative w-full pt-16 pb-28 md:py-32 flex flex-col md:flex-row items-center">
+                <div class="number-node absolute top-16 md:top-1/2 right-6 md:right-1/2 w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-lg font-medium z-20">1</div>
+
+                <div class="w-full md:w-1/2 pr-14 pl-4 md:pr-4 md:pl-16 lg:pl-20 relative mb-8 md:mb-0">
+                    <div class="img-wrapper bg-stone-200 aspect-[3/2] shadow-xl">
+                        <img src="https://drive.google.com/thumbnail?id=1ouo1NaCSv_dsNcNMCGujJ6bmbTLMibn6&sz=w1600" alt="נער שקוע בטלפון על רקע שמיים" class="w-full h-full object-cover img-loaded" onload="this.classList.remove('opacity-0')">
+                    </div>
+                </div>
+
+                <div class="w-full md:w-1/2 pr-14 pl-4 md:pl-8 md:pr-16 lg:pr-20 text-wrapper text-right">
+                    <div class="glass-card p-8 md:p-10 lg:p-12">
+                        <div class="inline-flex items-center gap-2.5 mb-6 md:mb-8 bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_15px_rgba(0,0,0,0.03)] px-4 py-1.5 rounded-full" dir="ltr">
+                            <svg class="w-3.5 h-3.5 text-theme-accent opacity-70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="font-sans text-[0.65rem] md:text-xs tracking-[0.15em] font-bold uppercase text-theme-accent opacity-80 whitespace-nowrap mt-[1px]">Low Angle &amp; Medium Shot</span>
+                        </div>
+                        <h2 class="text-3xl md:text-5xl font-light text-theme-accent mb-6 tracking-tight">הניתוק</h2>
+                        <p class="text-lg md:text-xl leading-relaxed text-theme-text font-light opacity-90">
+                            בתמונה נראה נער שקוע לחלוטין במסך הטלפון שלו, מנותק מסביבתו. הזווית הנמוכה מבודדת אותו על רקע השמיים הריקים ומדגישה את הניתוק שלו מהמציאות הפיזית. הוא עיוור לסביבה.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- shot 2 -->
+            <section id="shot-2" class="shot-section relative w-full pt-16 pb-28 md:py-32 flex flex-col md:flex-row-reverse items-center">
+                <div class="number-node absolute top-16 md:top-1/2 right-6 md:right-1/2 w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-lg font-medium z-20">2</div>
+
+                <div class="w-full md:w-1/2 pr-14 pl-4 md:pl-4 md:pr-16 lg:pr-20 relative mb-8 md:mb-0">
+                    <div class="img-wrapper bg-stone-200 aspect-[3/2] shadow-xl">
+                        <img src="https://drive.google.com/thumbnail?id=1LtwdSsFbGOfN-cPbRC-Udj8WCQL9BgO5&sz=w1600" alt="רגליים רצות רגע לפני היתקלות באבן" class="w-full h-full object-cover opacity-0 img-loaded" loading="lazy" onload="this.classList.remove('opacity-0')">
+                    </div>
+                </div>
+
+                <div class="w-full md:w-1/2 pr-14 pl-4 md:pr-8 md:pl-16 lg:pr-20 text-wrapper text-right">
+                    <div class="glass-card p-8 md:p-10 lg:p-12">
+                        <div class="inline-flex items-center gap-2.5 mb-6 md:mb-8 bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_15px_rgba(0,0,0,0.03)] px-4 py-1.5 rounded-full" dir="ltr">
+                            <svg class="w-3.5 h-3.5 text-theme-accent opacity-70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="font-sans text-[0.65rem] md:text-xs tracking-[0.15em] font-bold uppercase text-theme-accent opacity-80 whitespace-nowrap mt-[1px]">Close-Up &amp; Ground Level</span>
+                        </div>
+                        <h2 class="text-3xl md:text-5xl font-light text-theme-accent mb-6 tracking-tight">העיוורון</h2>
+                        <p class="text-lg md:text-xl leading-relaxed text-theme-text font-light opacity-90">
+                            השוט מתמקד ברגליים רגע לפני ההיתקלות באבן בולטת בשביל האפר. הזווית הנמוכה והקרובה מכריחה אותנו, הצופים, להבחין בפרט הקריטי שהדמות פספסה כי לא "עצרה להסתכל", ומייצרת תחושה של מתח רגע לפני הנפילה הבלתי נמנעת.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- shot 3 -->
+            <section id="shot-3" class="shot-section relative w-full pt-16 pb-28 md:py-32 flex flex-col md:flex-row items-center">
+                <div class="number-node absolute top-16 md:top-1/2 right-6 md:right-1/2 w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-lg font-medium z-20">3</div>
+
+                <div class="w-full md:w-1/2 pr-14 pl-4 md:pr-4 md:pl-16 lg:pl-20 relative mb-8 md:mb-0">
+                    <div class="img-wrapper bg-stone-200 aspect-[3/2] shadow-xl">
+                        <img src="https://drive.google.com/thumbnail?id=1G2ZvcRNPIdWt9TxQrC3K9QY7iRXQ5HCj&sz=w1600" alt="נער שרוע על הקרקע במבט מלמעלה" class="w-full h-full object-cover opacity-0 img-loaded" loading="lazy" onload="this.classList.remove('opacity-0')">
+                    </div>
+                </div>
+
+                <div class="w-full md:w-1/2 pr-14 pl-4 md:pl-8 md:pr-16 lg:pr-20 text-wrapper text-right">
+                    <div class="glass-card p-8 md:p-10 lg:p-12">
+                        <div class="inline-flex items-center gap-2.5 mb-6 md:mb-8 bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_15px_rgba(0,0,0,0.03)] px-4 py-1.5 rounded-full" dir="ltr">
+                            <svg class="w-3.5 h-3.5 text-theme-accent opacity-70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="font-sans text-[0.65rem] md:text-xs tracking-[0.15em] font-bold uppercase text-theme-accent opacity-80 whitespace-nowrap mt-[1px]">Overhead (Top-Down) Shot</span>
+                        </div>
+                        <h2 class="text-3xl md:text-5xl font-light text-theme-accent mb-6 tracking-tight">התוצאה</h2>
+                        <p class="text-lg md:text-xl leading-relaxed text-theme-text font-light opacity-90">
+                            הנער שרוע על הקרקע לאחר הנפילה, כאשר הטלפון והאבן מונחים לצדו. המבט הישיר מלמעלה מאפשר לצופה להתבונן בתוצאות חוסר תשומת הלב ממקום בוחן ואובייקטיבי.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- shot 4 -->
+            <section id="shot-4" class="shot-section relative w-full pt-16 pb-28 md:py-32 flex flex-col md:flex-row-reverse items-center">
+                <div class="number-node absolute top-16 md:top-1/2 right-6 md:right-1/2 w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-lg font-medium z-20">4</div>
+
+                <div class="w-full md:w-1/2 pr-14 pl-4 md:pl-4 md:pr-16 lg:pr-20 relative mb-8 md:mb-0">
+                    <div class="img-wrapper bg-stone-200 aspect-[3/2] shadow-xl">
+                        <img src="https://drive.google.com/thumbnail?id=1VuXpiyrTHepwqm5TW8Yt20Iuh7uLBq_d&sz=w1600" alt="נער יושב עם מסך מנופץ ומתבונן החוצה" class="w-full h-full object-cover opacity-0 img-loaded" loading="lazy" onload="this.classList.remove('opacity-0')">
+                    </div>
+                </div>
+
+                <div class="w-full md:w-1/2 pr-14 pl-4 md:pr-8 md:pl-16 lg:pr-20 text-wrapper text-right">
+                    <div class="glass-card p-8 md:p-10 lg:p-12">
+                        <div class="inline-flex items-center gap-2.5 mb-6 md:mb-8 bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_15px_rgba(0,0,0,0.03)] px-4 py-1.5 rounded-full" dir="ltr">
+                            <svg class="w-3.5 h-3.5 text-theme-accent opacity-70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="font-sans text-[0.65rem] md:text-xs tracking-[0.15em] font-bold uppercase text-theme-accent opacity-80 whitespace-nowrap mt-[1px]">Medium Close-Up &amp; Eye Level</span>
+                        </div>
+                        <h2 class="text-3xl md:text-5xl font-light text-theme-accent mb-6 tracking-tight">ההתפכחות</h2>
+                        <p class="text-lg md:text-xl leading-relaxed text-theme-text font-light opacity-90">
+                            הנער יושב על האדמה, אוחז בטלפון עם מסך מנופץ, אך מבטו סוף סוף מופנה החוצה אל העולם האמיתי. הצילום בגובה העיניים מחבר אותנו אליו רגשית ברגע ההתפכחות, שבו ההתרחשות הפיזית אילצה אותו לעצור, לנתק את המבט מהמסך, ולהסתכל על המציאות שסביבו.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- shot 5 -->
+            <section id="shot-5" class="shot-section relative w-full pt-16 pb-28 md:py-32 flex flex-col md:flex-row items-center">
+                <div class="number-node absolute top-16 md:top-1/2 right-6 md:right-1/2 w-8 h-8 md:w-12 md:h-12 rounded-full flex items-center justify-center text-sm md:text-lg font-medium z-20">5</div>
+
+                <div class="w-full md:w-1/2 pr-14 pl-4 md:pr-4 md:pl-16 lg:pl-20 relative mb-8 md:mb-0">
+                    <div class="img-wrapper bg-stone-200 aspect-[3/2] shadow-xl">
+                        <img src="https://drive.google.com/thumbnail?id=1LE_FDhTyDdh4DhTd5JMxmFPDlAk1WcBL&sz=w1600" alt="נער מתבונן בשדה פרחים מאחור" class="w-full h-full object-cover opacity-0 img-loaded" loading="lazy" onload="this.classList.remove('opacity-0')">
+                    </div>
+                </div>
+
+                <div class="w-full md:w-1/2 pr-14 pl-4 md:pl-8 md:pr-16 lg:pr-20 text-wrapper text-right">
+                    <div class="glass-card p-8 md:p-10 lg:p-12">
+                        <div class="inline-flex items-center gap-2.5 mb-6 md:mb-8 bg-white/60 backdrop-blur-md border border-white/80 shadow-[0_2px_15px_rgba(0,0,0,0.03)] px-4 py-1.5 rounded-full" dir="ltr">
+                            <svg class="w-3.5 h-3.5 text-theme-accent opacity-70 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                            </svg>
+                            <span class="font-sans text-[0.65rem] md:text-xs tracking-[0.15em] font-bold uppercase text-theme-accent opacity-80 whitespace-nowrap mt-[1px]">Wide Shot &amp; Rear Angle</span>
+                        </div>
+                        <h2 class="text-3xl md:text-5xl font-light text-theme-accent mb-6 tracking-tight">התבוננות</h2>
+                        <p class="text-lg md:text-xl leading-relaxed text-theme-text font-light opacity-90">
+                            הנער יושב בגבו למצלמה ומתבונן בשדה פרחים מרהיב, כשהטלפון מונח נטוש לצדו על האדמה. השוט הרחב והצילום מאחור ממקמים את הצופה באותה נקודת מבט של הנער, ומשלימים את המסר של הפרויקט: כעת גם הדמות וגם אנחנו חווים את הרגע במלואו, לוקחים את הזמן לעצור, ולהסתכל על היופי שסביבנו.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+    </main>
+
+    <footer class="text-theme-text py-24 text-center border-t border-theme-text/10 bg-white/30 backdrop-blur-md relative z-20">
+        <h2 class="text-4xl md:text-5xl font-light mb-8 text-theme-accent tracking-tight">לעצור להסתכל</h2>
+        <p class="text-base text-theme-text/70 font-medium tracking-[0.2em] uppercase mb-8">צילום // אורי בורשטיין</p>
+
+        <a href="mailto:bursteinori@gmail.com" class="inline-flex items-center gap-2 text-theme-text/80 hover:text-theme-accent transition-colors font-medium border border-theme-text/20 rounded-full px-5 py-2 hover:bg-white/50">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+            <span dir="ltr">bursteinori@gmail.com</span>
+        </a>
+
+        <p class="text-xs opacity-40 tracking-widest uppercase mt-16">© 2026 All Rights Reserved</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px 0px -20% 0px',
+                threshold: 0
+            };
+
+            const sectionObserver = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('is-visible');
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.shot-section').forEach(section => {
+                sectionObserver.observe(section);
+            });
+
+            const mainContent = document.getElementById('main-content');
+            const drawingLine = document.getElementById('drawing-line');
+
+            if (mainContent && drawingLine) {
+                const drawLineOnScroll = () => {
+                    const rect = mainContent.getBoundingClientRect();
+                    let drawHeight = (window.innerHeight / 2) - rect.top;
+                    drawHeight = Math.max(0, Math.min(drawHeight, mainContent.offsetHeight));
+                    drawingLine.style.height = drawHeight + 'px';
+                };
+
+                window.addEventListener('scroll', drawLineOnScroll, { passive: true });
+                window.addEventListener('resize', drawLineOnScroll, { passive: true });
+                drawLineOnScroll();
+            }
+        });
+    </script>
+
+</body>
+</html>
