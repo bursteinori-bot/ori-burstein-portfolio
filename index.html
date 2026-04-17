@@ -519,6 +519,60 @@
 
     #about-text-wrap {
       position: relative;
+      background-color: #fdf9f2;
+      background-image:
+        /* Red margin line — right side (RTL notebook) */
+        linear-gradient(to left,
+          transparent 79px,
+          rgba(195,55,55,0.2) 79px, rgba(195,55,55,0.2) 80.5px,
+          transparent 80.5px),
+        /* Horizontal ruled lines */
+        repeating-linear-gradient(
+          transparent 0px, transparent 27px,
+          rgba(110,125,205,0.13) 27px, rgba(110,125,205,0.13) 28.5px
+        );
+      padding: 36px 40px 40px;
+      box-shadow: 2px 4px 22px rgba(0,0,0,0.11), 1px 1px 5px rgba(0,0,0,0.06);
+    }
+    /* Torn top edge — shows page bg color biting into paper */
+    #about-text-wrap::before {
+      content: '';
+      position: absolute;
+      top: -13px; left: -3px; right: -3px;
+      height: 15px;
+      background: #ede5d8;
+      clip-path: polygon(
+        0% 0%, 100% 0%,
+        100% 48%, 97% 95%, 94% 35%, 91% 88%, 88% 18%,
+        85% 78%, 82% 12%, 79% 72%, 76% 28%, 73% 82%,
+        70% 15%, 67% 68%, 64% 8%, 61% 78%, 58% 22%,
+        55% 85%, 52% 18%, 49% 65%, 46% 5%, 43% 72%,
+        40% 22%, 37% 80%, 34% 14%, 31% 68%, 28% 24%,
+        25% 82%, 22% 12%, 19% 75%, 16% 18%, 13% 78%,
+        10% 12%, 7% 65%, 4% 28%, 1% 85%, 0% 45%
+      );
+      z-index: 1;
+      pointer-events: none;
+    }
+    /* Torn bottom edge */
+    #about-text-wrap::after {
+      content: '';
+      position: absolute;
+      bottom: -13px; left: -3px; right: -3px;
+      height: 15px;
+      background: #ede5d8;
+      clip-path: polygon(
+        0% 100%, 100% 100%,
+        100% 52%, 97% 5%, 94% 65%, 91% 12%, 88% 82%,
+        85% 22%, 82% 88%, 79% 28%, 76% 72%, 73% 18%,
+        70% 85%, 67% 32%, 64% 92%, 61% 22%, 58% 78%,
+        55% 15%, 52% 82%, 49% 35%, 46% 95%, 43% 28%,
+        40% 78%, 37% 20%, 34% 86%, 31% 32%, 28% 76%,
+        25% 18%, 22% 88%, 19% 25%, 16% 82%, 13% 22%,
+        10% 88%, 7% 35%, 4% 72%, 1% 15%, 0% 55%
+      );
+      z-index: 1;
+      pointer-events: none;
     }
 
     #about-statement {
@@ -619,7 +673,7 @@
         gap: 32px;
         /* photo second in DOM — show it first on mobile via order */
       }
-      #about-text-wrap { order: 2; }
+      #about-text-wrap { order: 2; overflow: visible; padding: 28px 24px 32px; }
       #about-photo {
         order: 1;
         aspect-ratio: 1/1;
@@ -1009,6 +1063,23 @@
     #story-modal.no-hero #story-modal-hero { display: none; }
     #story-modal.no-hero #story-modal-title { margin-top: 60px; }
 
+    /* modal: project embed mode */
+    #story-modal.project-mode #story-modal-title,
+    #story-modal.project-mode #story-modal-byline { display: none; }
+    #story-modal.project-mode #story-modal-content {
+      max-width: none;
+      padding: 0;
+      margin: 0;
+    }
+    #story-modal.project-mode #story-modal-scroll { overflow: hidden; }
+    #project-embed-iframe {
+      width: 100%;
+      height: calc(100vh - 80px);
+      border: none;
+      display: block;
+      margin-top: 80px;
+    }
+
     /* modal: section headers for multi-part stories */
     .story-section-heading {
       font-family: 'Yarden', serif;
@@ -1040,47 +1111,6 @@
     }
 
 
-    /* ── PROJECT OVERLAY ── */
-    #project-overlay {
-      position: fixed;
-      inset: 0;
-      z-index: 1100;
-      background: #f5f0e6;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.35s ease;
-      display: flex;
-      flex-direction: column;
-    }
-    #project-overlay.open {
-      opacity: 1;
-      pointer-events: all;
-    }
-    #project-overlay-close {
-      position: absolute;
-      top: 14px;
-      left: 18px;
-      z-index: 10;
-      width: 38px; height: 38px;
-      background: rgba(255,255,255,0.7);
-      backdrop-filter: blur(12px);
-      border: 1px solid rgba(255,255,255,0.85);
-      border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-      transition: background 0.2s;
-    }
-    #project-overlay-close:hover { background: rgba(255,255,255,0.95); }
-    #project-overlay-close svg {
-      width: 16px; height: 16px;
-      stroke: #2c2825; stroke-width: 1.8; fill: none;
-    }
-    #project-iframe {
-      width: 100%; height: 100%;
-      border: none;
-      flex: 1;
-    }
 
     /* ── STORY MODAL ── */
     #story-modal {
@@ -1683,8 +1713,8 @@
 
   <div id="hero-cta">
     <a href="mailto:bursteinori@gmail.com">
-      <span class="hero-cta-label">got something on your mind?</span>
-      <span class="hero-cta-action">slide into my inbox ↗</span>
+      <span class="hero-cta-label">יש לך משהו על הלב?</span>
+      <span class="hero-cta-action">שלח לי מייל ↗</span>
     </a>
   </div>
 
@@ -1772,28 +1802,28 @@
 </section>
 
 <!-- CONTACT + NEWSLETTER -->
-<section id="contact-section" class="section" dir="ltr">
-  <div class="section-label">get in touch</div>
+<section id="contact-section" class="section" dir="rtl">
+  <div class="section-label">צור קשר</div>
   <div id="contact-inner">
 
     <div id="contact-cta">
-      <h3 id="contact-heading">got a story,<br>a rant, or just<br>wanna say hi?</h3>
-      <p id="contact-sub">pitches, collabs, random thoughts —<br>all welcome. don't be a stranger.</p>
+      <h3 id="contact-heading">יש לך סיפור,<br>רנט, או סתם<br>רוצה להגיד שלום?</h3>
+      <p id="contact-sub">רעיונות, שיתופי פעולה, מחשבות —<br>הכל מתאים. אל תהיה זר.</p>
       <a href="mailto:bursteinori@gmail.com" id="contact-mail-btn">
         <svg viewBox="0 0 24 24"><path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/></svg>
-        mail me
+        שלח לי מייל
       </a>
     </div>
 
     <div id="newsletter-wrap">
-      <p id="newsletter-label">newsletter</p>
-      <h4 id="newsletter-heading">stay in<br>the loop</h4>
-      <p id="newsletter-sub">no spam. just stories, when they're ready.<br>drop your email and i'll do the rest.</p>
+      <p id="newsletter-label">ניוזלטר</p>
+      <h4 id="newsletter-heading">הישאר<br>בתמונה</h4>
+      <p id="newsletter-sub">בלי ספאם. רק סיפורים, כשהם מוכנים.<br>תשאיר את האימייל שלך ואני אדאג לשאר.</p>
       <form id="newsletter-form" onsubmit="subscribeNewsletter(event)">
-        <input type="email" id="newsletter-email" placeholder="your@email.com" required autocomplete="email">
-        <button type="submit" id="newsletter-btn">subscribe ↗</button>
+        <input type="email" id="newsletter-email" placeholder="האימייל שלך" required autocomplete="email">
+        <button type="submit" id="newsletter-btn">הרשמה ↗</button>
       </form>
-      <p id="newsletter-thanks">you're in. talk soon. ✓</p>
+      <p id="newsletter-thanks">נרשמת. נדבר בקרוב. ✓</p>
     </div>
 
   </div>
@@ -1838,13 +1868,6 @@
   </div>
 </div>
 
-<!-- ── PROJECT OVERLAY ── -->
-<div id="project-overlay">
-  <button id="project-overlay-close" onclick="closeProject()" aria-label="סגור">
-    <svg viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-  </button>
-  <iframe id="project-iframe" src="" title="פרויקט"></iframe>
-</div>
 
 <!-- ── STORY CONTENT TEMPLATES (hidden) ── removed, stories loaded from /stories/ ──
 <div style="display:none">
@@ -2754,27 +2777,25 @@ function subscribeNewsletter(e) {
   }, 400);
 }
 
-function closeProject() {
-  const overlay = document.getElementById('project-overlay');
-  const iframe  = document.getElementById('project-iframe');
-  overlay.classList.remove('open');
-  document.body.style.overflow = '';
-  history.pushState({}, 'מושב אחד', '#');
-  setTimeout(() => { iframe.src = ''; }, 350);
-}
-
 async function openStory(id) {
   const story = STORIES.find(s => s.id === id);
   if (!story) return;
 
-  // Projects open in a full-screen iframe overlay
+  // Projects open inside the story modal as a full-height iframe
   if (story.projectUrl) {
     history.pushState({ storyId: id }, story.title, '#' + story.slug);
     document.title = story.title + ' | אורי בורשטיין';
-    const iframe = document.getElementById('project-iframe');
-    iframe.src = story.projectUrl;
-    document.getElementById('project-overlay').classList.add('open');
+    const byAuthorEl = document.querySelector('#story-modal-byline span');
+    const authorLbl  = document.querySelector('.modal-author-label');
+    if (byAuthorEl) byAuthorEl.textContent = 'אורי בורשטיין';
+    if (authorLbl)  authorLbl.textContent  = 'אורי בורשטיין';
+    storyModal.classList.remove('has-episodes', 'light-mode');
+    storyModal.classList.add('no-hero', 'project-mode');
+    document.getElementById('story-modal-body').innerHTML =
+      `<iframe id="project-embed-iframe" src="${story.projectUrl}" title="${story.title}"></iframe>`;
+    storyModal.classList.add('open');
     document.body.style.overflow = 'hidden';
+    document.getElementById('story-modal-scroll').scrollTop = 0;
     return;
   }
 
@@ -2876,7 +2897,9 @@ async function loadEpisodeContent(file, el, readLbl) {
   }
 }
 function closeStory() {
-  storyModal.classList.remove('open');
+  storyModal.classList.remove('open', 'project-mode');
+  const embedIframe = document.getElementById('project-embed-iframe');
+  if (embedIframe) embedIframe.src = '';
   document.body.style.overflow = '';
   history.pushState('', document.title, location.pathname);
 
@@ -2913,7 +2936,6 @@ function toggleStoryTheme() {
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeStory();
-    closeProject();
     if (document.getElementById('stories-search-wrap').style.display !== 'none') toggleSearch(false);
   }
 });
@@ -2925,9 +2947,7 @@ window.addEventListener('popstate', () => {
     const match = STORIES.find(s => s.slug === slug);
     if (match) openStory(match.id);
   } else {
-    storyModal.classList.remove('open');
-    document.getElementById('project-overlay').classList.remove('open');
-    document.body.style.overflow = '';
+    closeStory();
   }
 });
 
