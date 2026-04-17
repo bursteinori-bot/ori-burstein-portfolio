@@ -88,6 +88,27 @@
         ]
       },
       {
+        "@type": "Review",
+        "@id": "https://oriburstein.com/#euphoria-s3-review",
+        "name": "אופוריה עונה שלוש — ביקורת מתגלגלת",
+        "url": "https://oriburstein.com/#euphoria-season-3",
+        "author": { "@id": "https://oriburstein.com/#person" },
+        "inLanguage": "he",
+        "datePublished": "2026-04-17",
+        "description": "ביקורת מתגלגלת פרק אחר פרק על העונה השלישית של אופוריה. על הצילום ב-35מ\"מ, הנס צימר, רו, וסם לוינסון.",
+        "keywords": "אופוריה עונה שלוש, אופוריה עונה 3, ביקורת אופוריה, euphoria season 3, ביקורת מתגלגלת, זנדאיה",
+        "itemReviewed": {
+          "@type": "TVSeason",
+          "name": "Euphoria — Season 3",
+          "seasonNumber": 3,
+          "partOfSeries": {
+            "@type": "TVSeries",
+            "name": "Euphoria",
+            "url": "https://www.hbo.com/euphoria"
+          }
+        }
+      },
+      {
         "@type": "ShortStory",
         "name": "השמיים כרגע כחולים",
         "url": "https://oriburstein.com/#hashmaim-karagah-kchulim",
@@ -2331,11 +2352,6 @@ function mdToHtml(md) {
       if (!block) return '';
       if (block.startsWith('#### ')) return `<h4 class="story-section-heading">${inlineHtml(block.slice(5))}</h4>`;
       if (block.startsWith('### '))  return `<h3 class="story-section-heading">${inlineHtml(block.slice(4))}</h3>`;
-      // rating marker: line starting with +N
-      if (/^\+\d+$/.test(block.trim())) {
-        const n = block.trim().slice(1);
-        return `<div class="review-rating"><span>+${n}</span></div>`;
-      }
       return `<p>${inlineHtml(block)}</p>`;
     })
     .join('\n');
@@ -2344,8 +2360,9 @@ function esc(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
 }
 // Inline markdown with link support — handles [text](url) before escaping
+// URL regex allows one level of parens e.g. /wiki/Nate_Jacobs_(Euphoria)
 function inlineHtml(raw) {
-  const linkRe = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+  const linkRe = /\[([^\]]+)\]\((https?:\/\/(?:[^)(]|\([^)]*\))+)\)/g;
   const parts = [];
   let last = 0, m;
   while ((m = linkRe.exec(raw)) !== null) {
@@ -2475,6 +2492,7 @@ async function openStory(id) {
   const storyImg = story.cover ? 'https://oriburstein.com/' + story.cover : 'https://oriburstein.com/freepik_a-breathtaking-ultrawide-_2763376983.jpg';
   document.title = story.title + ' — אורי בורשטיין';
   document.querySelector('meta[name="description"]').content = story.teaser;
+  if (story.seoKeywords) document.querySelector('meta[name="keywords"]').content = story.seoKeywords;
   document.querySelector('meta[property="og:title"]').content = story.title + ' — אורי בורשטיין';
   document.querySelector('meta[property="og:description"]').content = story.teaser;
   document.querySelector('meta[property="og:url"]').content = storyUrl;
