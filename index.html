@@ -1135,6 +1135,82 @@
       margin-bottom: 2.2em;
     }
 
+    /* ── EPISODE TABS (review series) ── */
+    .episode-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 0 0 28px;
+      border-bottom: 1px solid rgba(200,185,160,0.12);
+      margin-bottom: 32px;
+    }
+    .ep-tab {
+      font-family: 'Yarden', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.05em;
+      padding: 6px 14px;
+      border: 1px solid rgba(200,185,160,0.18);
+      border-radius: 2px;
+      background: transparent;
+      color: rgba(200,185,160,0.45);
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s, background 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .ep-tab:hover:not([disabled]) {
+      color: rgba(238,228,210,0.85);
+      border-color: rgba(200,185,160,0.38);
+    }
+    .ep-tab.active {
+      color: rgba(238,228,210,0.95);
+      border-color: rgba(200,185,160,0.55);
+      background: rgba(200,185,160,0.08);
+    }
+    .ep-tab[disabled] { cursor: default; opacity: 0.4; }
+    .ep-soon {
+      font-size: 0.6rem;
+      letter-spacing: 0.04em;
+      color: rgba(200,185,160,0.35);
+      border: 1px solid rgba(200,185,160,0.18);
+      border-radius: 2px;
+      padding: 1px 5px;
+    }
+
+    /* ── REVIEW CONTENT ── */
+    .review-rating {
+      text-align: left;
+      margin: -1em 0 2em;
+    }
+    .review-rating span {
+      font-family: 'Yarden', serif;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: rgba(200,185,160,0.35);
+      border: 1px solid rgba(200,185,160,0.15);
+      border-radius: 2px;
+      padding: 3px 10px;
+    }
+    a.review-link {
+      color: rgba(200,185,160,0.75);
+      text-decoration: underline;
+      text-decoration-color: rgba(200,185,160,0.25);
+      text-underline-offset: 3px;
+      transition: color 0.2s, text-decoration-color 0.2s;
+    }
+    a.review-link:hover {
+      color: rgba(238,228,210,0.95);
+      text-decoration-color: rgba(200,185,160,0.6);
+    }
+    /* light mode overrides */
+    #story-modal.light-mode .episode-tabs { border-bottom-color: rgba(60,35,10,0.12); }
+    #story-modal.light-mode .ep-tab { color: rgba(60,35,10,0.45); border-color: rgba(60,35,10,0.2); }
+    #story-modal.light-mode .ep-tab.active { color: rgba(30,15,5,0.9); border-color: rgba(60,35,10,0.5); background: rgba(60,35,10,0.07); }
+    #story-modal.light-mode a.review-link { color: rgba(100,60,20,0.8); text-decoration-color: rgba(100,60,20,0.3); }
+    #story-modal.light-mode a.review-link:hover { color: rgba(60,30,8,0.95); }
+    #story-modal.light-mode .review-rating span { color: rgba(60,35,10,0.4); border-color: rgba(60,35,10,0.15); }
+
     /* theme toggle button */
     #story-theme-btn {
       background: none;
@@ -1385,6 +1461,7 @@
   <div id="stories-filter">
     <button class="filter-btn active" data-filter="הכל">הכל</button>
     <button class="filter-btn" data-filter="סיפור קצר">סיפור קצר</button>
+    <button class="filter-btn" data-filter="ביקורת">ביקורות</button>
     <span class="filter-sep"></span>
     <button class="filter-btn filter-search" onclick="toggleSearch()">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -2252,20 +2329,39 @@ function mdToHtml(md) {
     .map(block => {
       block = block.trim();
       if (!block) return '';
-      // h4
-      if (block.startsWith('#### ')) return `<h4 class="story-section-heading">${esc(block.slice(5))}</h4>`;
-      // h3
-      if (block.startsWith('### '))  return `<h3 class="story-section-heading">${esc(block.slice(4))}</h3>`;
-      // paragraph — inline: *em*, **strong**
-      let p = esc(block)
-        .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-        .replace(/\*(.+?)\*/g, '<em>$1</em>');
-      return `<p>${p}</p>`;
+      if (block.startsWith('#### ')) return `<h4 class="story-section-heading">${inlineHtml(block.slice(5))}</h4>`;
+      if (block.startsWith('### '))  return `<h3 class="story-section-heading">${inlineHtml(block.slice(4))}</h3>`;
+      // rating marker: line starting with +N
+      if (/^\+\d+$/.test(block.trim())) {
+        const n = block.trim().slice(1);
+        return `<div class="review-rating"><span>+${n}</span></div>`;
+      }
+      return `<p>${inlineHtml(block)}</p>`;
     })
     .join('\n');
 }
 function esc(s) {
   return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+// Inline markdown with link support — handles [text](url) before escaping
+function inlineHtml(raw) {
+  const linkRe = /\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g;
+  const parts = [];
+  let last = 0, m;
+  while ((m = linkRe.exec(raw)) !== null) {
+    if (m.index > last) parts.push({ type: 'text', val: raw.slice(last, m.index) });
+    parts.push({ type: 'link', text: m[1], url: m[2] });
+    last = m.index + m[0].length;
+  }
+  if (last < raw.length) parts.push({ type: 'text', val: raw.slice(last) });
+  return parts.map(p => {
+    if (p.type === 'link') {
+      return `<a href="${p.url}" target="_blank" rel="noopener noreferrer" class="review-link">${esc(p.text)}</a>`;
+    }
+    return esc(p.val)
+      .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
+      .replace(/\*(.+?)\*/g, '<em>$1</em>');
+  }).join('');
 }
 
 // ── Build a gallery card from story metadata ──
@@ -2289,7 +2385,7 @@ function buildCard(s, idx) {
     </div>
     <div class="story-page-back"></div>
     <div class="story-page-back"></div>
-    <div class="gallery-card story-cover${s.cover ? '' : ' story-cover-no-img'}">
+    <div class="gallery-card story-cover${s.cover ? '' : ' story-cover-no-img'}"${s.coverBg && !s.cover ? ` style="background:${s.coverBg}"` : ''}>
       ${s.cover ? `<img class="story-cover-img" src="${s.cover}" alt="${s.title}">` : ''}
       <div class="story-cover-overlay"></div>
       <div class="story-cover-meta">
@@ -2392,15 +2488,58 @@ async function openStory(id) {
   document.body.style.overflow = 'hidden';
   document.getElementById('story-modal-scroll').scrollTop = 0;
 
+  // Episode tabs for series/review stories
+  if (story.episodes && story.episodes.length > 0) {
+    storyModal.classList.add('has-episodes');
+    const activeEp = story.episodes.find(e => e.file) || story.episodes[0];
+    renderEpisodeTabs(story, activeEp.num, bodyEl, readLbl);
+  } else {
+    storyModal.classList.remove('has-episodes');
+    await loadEpisodeContent(story.file, bodyEl, readLbl);
+  }
+}
+
+function renderEpisodeTabs(story, activeNum, bodyEl, readLbl) {
+  const tabsHtml = `<div class="episode-tabs" dir="rtl">${
+    story.episodes.map(ep => {
+      const isActive = ep.num === activeNum;
+      const hasContent = !!ep.file;
+      return `<button class="ep-tab${isActive ? ' active' : ''}${!hasContent ? ' soon' : ''}"
+        data-ep="${ep.num}" data-story="${story.id}"
+        ${!hasContent ? 'disabled' : ''}>${ep.label}${!hasContent ? '<span class="ep-soon">בקרוב</span>' : ''}</button>`;
+    }).join('')
+  }</div>`;
+
+  const activeEp = story.episodes.find(e => e.num === activeNum);
+  bodyEl.innerHTML = tabsHtml + '<div class="ep-content"><p style="opacity:0.4">טוען...</p></div>';
+
+  // Bind tab clicks
+  bodyEl.querySelectorAll('.ep-tab:not([disabled])').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const epNum = +btn.dataset.ep;
+      const ep = story.episodes.find(e => e.num === epNum);
+      if (!ep || !ep.file) return;
+      bodyEl.querySelectorAll('.ep-tab').forEach(b => b.classList.toggle('active', +b.dataset.ep === epNum));
+      const contentEl = bodyEl.querySelector('.ep-content');
+      loadEpisodeContent(ep.file, contentEl, readLbl);
+      document.getElementById('story-modal-scroll').scrollTop = 0;
+    });
+  });
+
+  if (activeEp && activeEp.file) {
+    loadEpisodeContent(activeEp.file, bodyEl.querySelector('.ep-content'), readLbl);
+  }
+}
+
+async function loadEpisodeContent(file, el, readLbl) {
   try {
-    const md    = await (await fetch(story.file)).text();
-    const html  = mdToHtml(md);
-    bodyEl.innerHTML = html;
+    const md   = await (await fetch(file)).text();
+    el.innerHTML = mdToHtml(md);
     const words = md.trim().split(/\s+/).length;
     const mins  = Math.ceil(words / 200);
     if (readLbl) readLbl.textContent = `${mins} דקות קריאה`;
   } catch(e) {
-    bodyEl.innerHTML = '<p>שגיאה בטעינת הסיפור.</p>';
+    el.innerHTML = '<p>שגיאה בטעינת התוכן.</p>';
   }
 }
 function closeStory() {

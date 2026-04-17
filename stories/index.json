@@ -20,5 +20,27 @@
     "teaser": "אני לוקח עוד לגימה. הוויסקי שורף, אבל זה בדיוק הגועל בגוף שרציתי להרגיש.",
     "cover": "story2.jpg",
     "file": "stories/olamot-nechravim.md"
+  },
+  {
+    "id": 3,
+    "slug": "euphoria-season-3",
+    "title": "אופוריה עונה שלוש",
+    "category": "ביקורת",
+    "tabLabel": "ג׳",
+    "badge": "03",
+    "teaser": "ממש רציתי לשנוא את פרק הפתיחה, אבל אי אפשר לקחת את העובדה שרותקתי למסך.",
+    "cover": null,
+    "coverBg": "linear-gradient(160deg, #0d0510 0%, #1a0d2e 45%, #0a1528 100%)",
+    "file": "stories/euphoria-s3-ep1.md",
+    "episodes": [
+      { "num": 1, "label": "פרק 1", "file": "stories/euphoria-s3-ep1.md" },
+      { "num": 2, "label": "פרק 2", "file": null },
+      { "num": 3, "label": "פרק 3", "file": null },
+      { "num": 4, "label": "פרק 4", "file": null },
+      { "num": 5, "label": "פרק 5", "file": null },
+      { "num": 6, "label": "פרק 6", "file": null },
+      { "num": 7, "label": "פרק 7", "file": null },
+      { "num": 8, "label": "פרק 8", "file": null }
+    ]
   }
 ]
