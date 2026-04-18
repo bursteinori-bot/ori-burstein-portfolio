@@ -872,24 +872,24 @@
     /* ── Main card ── */
     .gallery-card.story-cover {
       padding: 0;
-      height: 300px;
+      height: 340px;
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      border-radius: 2px;
-      border: 1px solid rgba(200,185,160,0.11);
+      border-radius: 3px;
+      border: 1px solid rgba(200,185,160,0.13);
       z-index: 3;
       transition: transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94),
                   box-shadow 0.45s ease, border-color 0.45s ease;
-      box-shadow: 0 6px 28px rgba(0,0,0,0.55);
+      box-shadow: 0 8px 32px rgba(0,0,0,0.6);
     }
     .gallery-card.story-cover::after { display: none; }
     .story-file-wrapper:hover .gallery-card.story-cover {
-      transform: translateY(-5px);
-      border-color: rgba(200,185,160,0.22);
-      box-shadow: 0 14px 44px rgba(0,0,0,0.65),
-                  0 0 0 1px rgba(180,130,50,0.1),
-                  inset 0 1px 0 rgba(255,220,120,0.05);
+      transform: translateY(-6px);
+      border-color: rgba(200,185,160,0.26);
+      box-shadow: 0 18px 52px rgba(0,0,0,0.7),
+                  0 0 0 1px rgba(180,130,50,0.12),
+                  inset 0 1px 0 rgba(255,220,120,0.06);
     }
 
     .story-cover-img {
@@ -911,9 +911,9 @@
       position: absolute;
       inset: 0;
       background: linear-gradient(to top,
-        rgba(10,8,5,0.88) 0%,
-        rgba(10,8,5,0.42) 38%,
-        rgba(10,8,5,0.04) 62%,
+        rgba(10,8,5,0.92) 0%,
+        rgba(10,8,5,0.55) 35%,
+        rgba(10,8,5,0.12) 60%,
         transparent 100%
       );
       pointer-events: none;
@@ -978,6 +978,22 @@
       font-size: 0.62rem;
       color: rgba(200,185,160,0.38);
       margin-bottom: 0;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+    .story-cover-date {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.08em;
+      color: rgba(200,185,160,0.28);
+    }
+    .story-cover-author-dot {
+      width: 2px; height: 2px;
+      border-radius: 50%;
+      background: rgba(200,185,160,0.22);
+      flex-shrink: 0;
     }
     .story-cover-divider {
       width: 20px; height: 1px;
@@ -2743,11 +2759,20 @@ function inlineHtml(raw) {
   }).join('');
 }
 
+// ── Format YYYY-MM date to Hebrew abbreviated month + year ──
+function formatDate(d) {
+  if (!d) return '';
+  const [y, m] = d.split('-');
+  const months = ['','ינו׳','פבר׳','מרץ','אפר׳','מאי','יוני','יולי','אוג׳','ספט׳','אוק׳','נוב׳','דצמ׳'];
+  return `${months[+m] || ''} ${y}`;
+}
+
 // ── Build a gallery card from story metadata ──
 function buildCard(s, idx) {
   const hebrewNums = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ז׳','ח׳','ט׳','י׳'];
   const tabLabel = s.tabLabel || hebrewNums[idx] || String(idx + 1);
   const badge    = s.badge    || String(idx + 1).padStart(2, '0');
+  const dateStr  = formatDate(s.date);
 
   const el = document.createElement('div');
   el.className = 'story-file-wrapper';
@@ -2776,7 +2801,7 @@ function buildCard(s, idx) {
       </div>
       <div class="story-cover-body">
         <h3 class="story-cover-title">${s.title}</h3>
-        <p class="story-cover-author">אורי בורשטיין</p>
+        <p class="story-cover-author">אורי בורשטיין${dateStr ? `<span class="story-cover-author-dot"></span><span class="story-cover-date">${dateStr}</span>` : ''}</p>
         <div class="story-cover-divider"></div>
         <p class="story-cover-teaser">${s.teaser || ''}</p>
       </div>
