@@ -2726,7 +2726,10 @@ function inlineHtml(raw) {
     }
     return esc(p.val)
       .replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
-      .replace(/\*(.+?)\*/g, '<em>$1</em>');
+      .replace(/\*(.+?)\*/g, '<em>$1</em>')
+      .replace(/==(.+?)==/g, '<span class="draft-highlight">$1</span>')
+      .replace(/%%(.+?)%%/g, '<span class="draft-wavy">$1</span>')
+      .replace(/@@(.+?)@@/g, '<span class="draft-circle">$1</span>');
   }).join('');
 }
 
