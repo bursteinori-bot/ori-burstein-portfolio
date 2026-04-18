@@ -2200,17 +2200,24 @@ async function playSingle(durationMs) {
     beginPreload(upNext);
   }, isMobileDevice ? 0 : 650);
 
-  if (durationMs !== undefined) {
-    await sleep(durationMs);
-  } else {
-    const playingEl = current;
-    await new Promise(resolve => {
-      let done = false;
-      const finish = () => { if (done) return; done = true; playingEl.removeEventListener('ended', finish); resolve(); };
-      playingEl.addEventListener('ended', finish);
+  // Wait for whichever comes first: the duration timer OR the video ending naturally.
+  // This prevents the video from freezing on its last frame.
+  const playingEl = current;
+  await new Promise(resolve => {
+    let done = false;
+    const finish = () => {
+      if (done) return;
+      done = true;
+      playingEl.removeEventListener('ended', finish);
+      resolve();
+    };
+    playingEl.addEventListener('ended', finish);
+    if (durationMs !== undefined) {
+      setTimeout(finish, durationMs);
+    } else {
       setTimeout(finish, 7000);
-    });
-  }
+    }
+  });
 }
 
 // ─────────────────────────────────────────────
