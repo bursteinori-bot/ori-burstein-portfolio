@@ -1521,17 +1521,20 @@
       left: 44px;
       z-index: 10;
       pointer-events: all;
+      transition: opacity 0.25s ease;
     }
-    #hero-cta a {
+    #hero-cta {
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      gap: 3px;
-      text-decoration: none;
-      color: rgba(255,255,255,0.32);
-      transition: color 0.4s ease;
+      gap: 4px;
     }
-    #hero-cta a:hover { color: rgba(255,255,255,0.88); }
+    #hero-cta a {
+      text-decoration: none;
+      color: rgba(255,255,255,0.55);
+      transition: color 0.3s ease;
+    }
+    #hero-cta a:hover { color: rgba(255,255,255,0.9); }
     .hero-cta-label {
       font-family: 'Inter', sans-serif;
       font-size: 0.58rem;
@@ -1544,6 +1547,15 @@
       font-style: italic;
       font-weight: 300;
       letter-spacing: 0.04em;
+    }
+    .hero-cta-cursor {
+      display: inline-block;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.75rem;
+      font-style: normal;
+      color: rgba(255,255,255,0.45);
+      animation: cur-blink 0.9s step-end infinite;
+      margin-right: 1px;
     }
 
     /* ── CONTACT + NEWSLETTER ── */
@@ -1695,6 +1707,7 @@
       .section { padding: 72px 24px; }
       #scroll-arrow { bottom: 20px; }
       #hero-cta { left: 20px; bottom: 22px; }
+      #hero-cta .hero-cta-label { display: none; }
       #contact-inner { grid-template-columns: 1fr; gap: 52px; }
       #newsletter-form { max-width: 100%; }
 
@@ -1754,10 +1767,8 @@
   </div>
 
   <div id="hero-cta">
-    <a href="mailto:bursteinori@gmail.com">
-      <span class="hero-cta-label">got something on your mind?</span>
-      <span class="hero-cta-action">slide into my inbox ↗</span>
-    </a>
+    <span class="hero-cta-label">want to talk?</span>
+    <a href="mailto:bursteinori@gmail.com" class="hero-cta-action"><span id="hero-cta-typed"></span><span class="hero-cta-cursor">|</span></a>
   </div>
 
   <div id="branding">
@@ -3048,6 +3059,41 @@ function toggleSearch(forceClose) {
     applyFilter();
   }
 }
+
+// ── Hero CTA Typewriter ──
+(function () {
+  const el = document.getElementById('hero-cta-typed');
+  const cta = document.getElementById('hero-cta');
+  if (!el || !cta) return;
+  const text = 'bursteinori@gmail.com';
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  async function type() {
+    el.textContent = '';
+    await wait(900);
+    for (const ch of text) {
+      el.textContent += ch;
+      await wait(55 + Math.random() * 35);
+    }
+  }
+  type();
+
+  // Hide on scroll down, show on scroll up
+  let lastY = 0;
+  window.addEventListener('scroll', () => {
+    const y = window.scrollY;
+    const hero = document.getElementById('hero');
+    const heroH = hero ? hero.offsetHeight : window.innerHeight;
+    if (y > heroH * 0.6) {
+      cta.style.opacity = '0';
+      cta.style.pointerEvents = 'none';
+    } else {
+      cta.style.opacity = '1';
+      cta.style.pointerEvents = 'all';
+    }
+    lastY = y;
+  }, { passive: true });
+})();
 
 // ── About Section Mark Reveal ──
 (function () {
