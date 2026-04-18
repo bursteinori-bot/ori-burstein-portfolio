@@ -3025,6 +3025,142 @@ function toggleSearch(forceClose) {
     applyFilter();
   }
 }
+
+// ── About Section Typewriter ──
+(function () {
+  const paras = [
+    document.getElementById('about-statement'),
+    document.getElementById('about-mid'),
+    document.getElementById('about-closing')
+  ].filter(Boolean);
+  if (!paras.length) return;
+
+  const originals = paras.map(p => p.innerHTML);
+
+  function escText(s) {
+    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  function parseEl(el) {
+    const segs = [];
+    for (const node of el.childNodes) {
+      if (node.nodeType === 3) {
+        if (node.textContent) segs.push({ kind: 'text', text: node.textContent });
+      } else if (node.nodeType === 1) {
+        const cls = node.className || '';
+        if (cls.includes('draft-note') || cls.includes('draft-cursor')) {
+          segs.push({ kind: 'skip', html: node.outerHTML });
+        } else if (node.tagName === 'BR') {
+          segs.push({ kind: 'br' });
+        } else {
+          segs.push({ kind: 'mark', tag: node.tagName.toLowerCase(), cls, text: node.textContent });
+        }
+      }
+    }
+    return segs;
+  }
+
+  const parsed = paras.map(parseEl);
+
+  function buildStates() {
+    const states = [];
+    const extras = new Set(); // indices of mark-completion states (get longer pause)
+    const cur = paras.map(() => '');
+
+    for (let pi = 0; pi < parsed.length; pi++) {
+      let base = '';
+      for (const seg of parsed[pi]) {
+        if (seg.kind === 'skip') continue;
+        if (seg.kind === 'br') {
+          base += '<br>';
+          cur[pi] = base;
+          states.push([...cur]);
+        } else if (seg.kind === 'text') {
+          for (const ch of seg.text) {
+            base += escText(ch);
+            cur[pi] = base;
+            states.push([...cur]);
+          }
+        } else if (seg.kind === 'mark') {
+          // Type chars without styling first
+          let building = '';
+          for (const ch of seg.text) {
+            building += escText(ch);
+            cur[pi] = base + `<span style="opacity:0.6">${building}</span>`;
+            states.push([...cur]);
+          }
+          // Apply the mark styling all at once
+          const open = seg.tag === 'del'
+            ? `<del class="${seg.cls}">`
+            : `<span class="${seg.cls}">`;
+          const close = seg.tag === 'del' ? '</del>' : '</span>';
+          base += open + escText(seg.text) + close;
+          cur[pi] = base;
+          states.push([...cur]);
+          extras.add(states.length - 1); // pause here
+        }
+      }
+    }
+    return { states, extras };
+  }
+
+  const { states, extras } = buildStates();
+  if (!states.length) return;
+
+  function render(idx) {
+    const s = states[Math.max(0, Math.min(idx, states.length - 1))];
+    paras.forEach((p, i) => { p.innerHTML = s[i] || ''; });
+  }
+
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  let token = 0;
+
+  async function run(myToken) {
+    while (token === myToken) {
+      paras.forEach(p => { p.innerHTML = ''; });
+
+      // Type forward
+      for (let i = 0; i < states.length; i++) {
+        if (token !== myToken) return;
+        render(i);
+        await wait(extras.has(i) ? 320 : 38 + Math.random() * 22);
+      }
+
+      if (token !== myToken) return;
+      await wait(2800); // pause at end
+
+      // Erase backward
+      for (let i = states.length - 1; i >= 0; i--) {
+        if (token !== myToken) return;
+        render(i);
+        await wait(11);
+      }
+
+      paras.forEach(p => { p.innerHTML = ''; });
+      if (token !== myToken) return;
+      await wait(700);
+    }
+  }
+
+  let running = false;
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting && !running) {
+        running = true;
+        const t = ++token;
+        run(t).finally(() => { if (token === t) running = false; });
+      } else if (!entry.isIntersecting) {
+        token++;
+        running = false;
+        paras.forEach((p, i) => { p.innerHTML = originals[i]; });
+      }
+    });
+  }, { threshold: 0.25 });
+
+  const section = paras[0].closest('.section');
+  if (section) observer.observe(section);
+})();
 </script>
 </body>
 </html>
