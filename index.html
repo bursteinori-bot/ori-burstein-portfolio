@@ -1522,31 +1522,32 @@
       z-index: 10;
       pointer-events: all;
       transition: opacity 0.25s ease;
-    }
-    #hero-cta {
       display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 4px;
+      align-items: baseline;
+      gap: 8px;
     }
-    #hero-cta a {
-      text-decoration: none;
-      color: rgba(255,255,255,0.55);
-      transition: color 0.3s ease;
-    }
-    #hero-cta a:hover { color: rgba(255,255,255,0.9); }
     .hero-cta-label {
       font-family: 'Inter', sans-serif;
       font-size: 0.58rem;
-      letter-spacing: 0.22em;
+      letter-spacing: 0.2em;
       text-transform: uppercase;
+      color: rgba(255,255,255,0.28);
     }
-    .hero-cta-action {
+    #hero-cta a {
       font-family: 'Cormorant Garamond', serif;
       font-size: 1.05rem;
       font-style: italic;
       font-weight: 300;
       letter-spacing: 0.04em;
+      text-decoration: none;
+      color: rgba(255,255,255,0.55);
+      border-bottom: 1px solid rgba(255,255,255,0.28);
+      padding-bottom: 1px;
+      transition: color 0.3s ease, border-color 0.3s ease;
+    }
+    #hero-cta a:hover {
+      color: rgba(255,255,255,0.9);
+      border-color: rgba(255,255,255,0.7);
     }
     .hero-cta-cursor {
       display: inline-block;
@@ -1706,7 +1707,7 @@
     @media (max-width: 700px) {
       .section { padding: 72px 24px; }
       #scroll-arrow { bottom: 20px; }
-      #hero-cta { left: 20px; bottom: 22px; }
+      #hero-cta { left: 20px; bottom: 90px; }
       #hero-cta .hero-cta-label { display: none; }
       #contact-inner { grid-template-columns: 1fr; gap: 52px; }
       #newsletter-form { max-width: 100%; }
