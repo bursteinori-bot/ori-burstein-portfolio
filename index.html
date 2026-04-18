@@ -616,7 +616,8 @@
 
     /* ── Draft / manuscript marks ── */
     .draft-highlight {
-      background: linear-gradient(120deg, rgba(255,210,40,0.38) 0%, rgba(255,210,40,0.22) 100%);
+      background: linear-gradient(120deg, rgba(255,210,40,0.38) 0%, rgba(255,210,40,0.22) 100%) no-repeat left;
+      background-size: 100% 100%;
       border-radius: 2px;
       padding: 0 3px;
     }
@@ -657,6 +658,25 @@
       content: '← ';
       font-size: 0.75rem;
     }
+
+    /* ── Mark reveal animation (hidden until .marks-revealed) ── */
+    #about-text-wrap .draft-del        { text-decoration-color: transparent; opacity: 1; }
+    #about-text-wrap .draft-circle     { border-color: transparent; color: inherit; }
+    #about-text-wrap .draft-highlight  { background-size: 0% 100%; }
+    #about-text-wrap .draft-wavy       { text-decoration-color: transparent; }
+    #about-text-wrap .draft-note       { opacity: 0; transform: translateX(-10px) rotate(1.5deg); }
+
+    #about-text-wrap.marks-revealed .draft-del       { animation: about-del-in    0.4s ease 0.1s  both; }
+    #about-text-wrap.marks-revealed .draft-circle    { animation: about-circle-in 0.5s ease 0.55s both; }
+    #about-text-wrap.marks-revealed .draft-highlight { animation: about-hl-sweep  0.7s ease 1.0s  both; }
+    #about-text-wrap.marks-revealed .draft-wavy      { animation: about-wavy-in   0.4s ease 1.5s  both; }
+    #about-text-wrap.marks-revealed .draft-note      { animation: about-note-in   0.45s ease 1.8s both; }
+
+    @keyframes about-del-in    { from { text-decoration-color: transparent; opacity: 1; } to { text-decoration-color: #c0392b; opacity: 0.55; } }
+    @keyframes about-circle-in { from { border-color: transparent; color: inherit; }      to { border-color: #c0392b; color: #c0392b; } }
+    @keyframes about-hl-sweep  { from { background-size: 0% 100%; }                      to { background-size: 100% 100%; } }
+    @keyframes about-wavy-in   { from { text-decoration-color: transparent; }            to { text-decoration-color: #c0392b; } }
+    @keyframes about-note-in   { from { opacity: 0; transform: translateX(-10px) rotate(1.5deg); } to { opacity: 1; transform: translateX(0) rotate(1.5deg); } }
 
     .draft-cursor {
       display: inline-block;
@@ -3026,140 +3046,18 @@ function toggleSearch(forceClose) {
   }
 }
 
-// ── About Section Typewriter ──
+// ── About Section Mark Reveal ──
 (function () {
-  const paras = [
-    document.getElementById('about-statement'),
-    document.getElementById('about-mid'),
-    document.getElementById('about-closing')
-  ].filter(Boolean);
-  if (!paras.length) return;
-
-  const originals = paras.map(p => p.innerHTML);
-
-  function escText(s) {
-    return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  }
-
-  function parseEl(el) {
-    const segs = [];
-    for (const node of el.childNodes) {
-      if (node.nodeType === 3) {
-        if (node.textContent) segs.push({ kind: 'text', text: node.textContent });
-      } else if (node.nodeType === 1) {
-        const cls = node.className || '';
-        if (cls.includes('draft-note') || cls.includes('draft-cursor')) {
-          segs.push({ kind: 'skip', html: node.outerHTML });
-        } else if (node.tagName === 'BR') {
-          segs.push({ kind: 'br' });
-        } else {
-          segs.push({ kind: 'mark', tag: node.tagName.toLowerCase(), cls, text: node.textContent });
-        }
-      }
-    }
-    return segs;
-  }
-
-  const parsed = paras.map(parseEl);
-
-  function buildStates() {
-    const states = [];
-    const extras = new Set(); // indices of mark-completion states (get longer pause)
-    const cur = paras.map(() => '');
-
-    for (let pi = 0; pi < parsed.length; pi++) {
-      let base = '';
-      for (const seg of parsed[pi]) {
-        if (seg.kind === 'skip') continue;
-        if (seg.kind === 'br') {
-          base += '<br>';
-          cur[pi] = base;
-          states.push([...cur]);
-        } else if (seg.kind === 'text') {
-          for (const ch of seg.text) {
-            base += escText(ch);
-            cur[pi] = base;
-            states.push([...cur]);
-          }
-        } else if (seg.kind === 'mark') {
-          // Type chars without styling first
-          let building = '';
-          for (const ch of seg.text) {
-            building += escText(ch);
-            cur[pi] = base + `<span style="opacity:0.6">${building}</span>`;
-            states.push([...cur]);
-          }
-          // Apply the mark styling all at once
-          const open = seg.tag === 'del'
-            ? `<del class="${seg.cls}">`
-            : `<span class="${seg.cls}">`;
-          const close = seg.tag === 'del' ? '</del>' : '</span>';
-          base += open + escText(seg.text) + close;
-          cur[pi] = base;
-          states.push([...cur]);
-          extras.add(states.length - 1); // pause here
-        }
-      }
-    }
-    return { states, extras };
-  }
-
-  const { states, extras } = buildStates();
-  if (!states.length) return;
-
-  function render(idx) {
-    const s = states[Math.max(0, Math.min(idx, states.length - 1))];
-    paras.forEach((p, i) => { p.innerHTML = s[i] || ''; });
-  }
-
-  const wait = ms => new Promise(r => setTimeout(r, ms));
-
-  let token = 0;
-
-  async function run(myToken) {
-    while (token === myToken) {
-      paras.forEach(p => { p.innerHTML = ''; });
-
-      // Type forward
-      for (let i = 0; i < states.length; i++) {
-        if (token !== myToken) return;
-        render(i);
-        await wait(extras.has(i) ? 320 : 38 + Math.random() * 22);
-      }
-
-      if (token !== myToken) return;
-      await wait(2800); // pause at end
-
-      // Erase backward
-      for (let i = states.length - 1; i >= 0; i--) {
-        if (token !== myToken) return;
-        render(i);
-        await wait(11);
-      }
-
-      paras.forEach(p => { p.innerHTML = ''; });
-      if (token !== myToken) return;
-      await wait(700);
-    }
-  }
-
-  let running = false;
+  const wrap = document.getElementById('about-text-wrap');
+  if (!wrap) return;
   const observer = new IntersectionObserver(entries => {
     entries.forEach(entry => {
-      if (entry.isIntersecting && !running) {
-        running = true;
-        const t = ++token;
-        run(t).finally(() => { if (token === t) running = false; });
-      } else if (!entry.isIntersecting) {
-        token++;
-        running = false;
-        paras.forEach((p, i) => { p.innerHTML = originals[i]; });
+      if (entry.isIntersecting) {
+        wrap.classList.add('marks-revealed');
       }
     });
   }, { threshold: 0.25 });
-
-  const section = paras[0].closest('.section');
-  if (section) observer.observe(section);
+  observer.observe(wrap.closest('.section') || wrap);
 })();
 </script>
 </body>
