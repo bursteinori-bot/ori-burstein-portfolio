@@ -787,50 +787,44 @@
       top: -26px;
       right: 18px;
       height: 28px;
-      padding: 0 14px 0 12px;
-      background: #221808;
-      border: 1px solid rgba(200,185,160,0.14);
+      padding: 0 13px;
+      background: #1e1408;
+      border: 1px solid rgba(200,185,160,0.13);
       border-bottom: none;
       clip-path: polygon(8px 0%, 100% 0%, 100% 100%, 0% 100%);
       display: flex;
       align-items: center;
-      gap: 7px;
+      gap: 6px;
       z-index: 5;
       transition: background 0.3s, border-color 0.3s;
       min-width: 0;
     }
-    .story-file-wrapper:hover .story-folder-tab {
-      background: #2a1c0a;
-      border-color: rgba(200,185,160,0.26);
-    }
-    .story-folder-tab-num {
-      font-family: 'Yarden', serif;
-      font-size: 0.62rem;
-      color: rgba(200,185,160,0.32);
-      flex-shrink: 0;
-      padding-left: 6px;
-    }
-    .story-folder-tab-sep {
-      width: 1px;
-      height: 9px;
-      background: rgba(200,185,160,0.14);
-      flex-shrink: 0;
-    }
+    /* ── Category colours ── */
+    .story-folder-tab.tab-fiction  { background: rgba(130,80,20,0.55);  border-color: rgba(200,145,55,0.28); }
+    .story-folder-tab.tab-review   { background: rgba(28,70,110,0.55);  border-color: rgba(80,155,210,0.28); }
+    .story-folder-tab.tab-project  { background: rgba(30,85,58,0.55);   border-color: rgba(70,175,115,0.28); }
+    .story-file-wrapper:hover .story-folder-tab.tab-fiction  { background: rgba(160,100,28,0.7);  border-color: rgba(220,165,70,0.5); }
+    .story-file-wrapper:hover .story-folder-tab.tab-review   { background: rgba(35,88,138,0.7);  border-color: rgba(100,175,230,0.5); }
+    .story-file-wrapper:hover .story-folder-tab.tab-project  { background: rgba(38,108,72,0.7);  border-color: rgba(90,200,140,0.5); }
     .story-folder-tab-label {
-      font-family: 'Yarden', serif;
-      font-size: 0.6rem;
-      letter-spacing: 0.04em;
-      color: rgba(200,185,160,0.4);
+      font-family: 'Inter', sans-serif;
+      font-size: 0.55rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: rgba(240,225,200,0.7);
       white-space: nowrap;
     }
+    .tab-fiction  .story-folder-tab-label { color: rgba(255,210,120,0.85); }
+    .tab-review   .story-folder-tab-label { color: rgba(130,195,240,0.85); }
+    .tab-project  .story-folder-tab-label { color: rgba(110,215,155,0.85); }
     .story-folder-tab-arrow {
-      margin-left: 2px;
-      font-size: 0.6rem;
-      color: rgba(200,185,160,0.18);
+      margin-left: 1px;
+      font-size: 0.58rem;
+      color: rgba(255,255,255,0.25);
       transition: color 0.3s, transform 0.3s;
     }
     .story-file-wrapper:hover .story-folder-tab-arrow {
-      color: rgba(200,185,160,0.55);
+      color: rgba(255,255,255,0.65);
       transform: translateX(2px);
     }
 
@@ -850,6 +844,7 @@
       inset: 3px;
       background-color: #1c1508;
       border: 1px solid rgba(200,185,160,0.08);
+      border-radius: 10px;
       transform: rotate(-2.4deg) translateY(8px) translateX(-4px);
       z-index: 0;
       box-shadow: 0 4px 20px rgba(0,0,0,0.5);
@@ -858,6 +853,7 @@
       inset: 3px;
       background-color: #201b0e;
       border: 1px solid rgba(200,185,160,0.06);
+      border-radius: 10px;
       transform: rotate(1.6deg) translateY(6px) translateX(4px);
       z-index: 1;
       box-shadow: 0 4px 16px rgba(0,0,0,0.4);
@@ -876,7 +872,7 @@
       cursor: pointer;
       position: relative;
       overflow: hidden;
-      border-radius: 3px;
+      border-radius: 10px;
       border: 1px solid rgba(200,185,160,0.13);
       z-index: 3;
       transition: transform 0.45s cubic-bezier(0.25,0.46,0.45,0.94),
@@ -2767,12 +2763,13 @@ function formatDate(d) {
   return `${months[+m] || ''} ${y}`;
 }
 
+const CATEGORY_CLASS = { 'סיפור קצר': 'tab-fiction', 'ביקורת': 'tab-review', 'פרויקט': 'tab-project' };
+
 // ── Build a gallery card from story metadata ──
 function buildCard(s, idx) {
-  const hebrewNums = ['א׳','ב׳','ג׳','ד׳','ה׳','ו׳','ז׳','ח׳','ט׳','י׳'];
-  const tabLabel = s.tabLabel || hebrewNums[idx] || String(idx + 1);
-  const badge    = s.badge    || String(idx + 1).padStart(2, '0');
+  const badge    = s.badge || String(idx + 1).padStart(2, '0');
   const dateStr  = formatDate(s.date);
+  const tabCls   = CATEGORY_CLASS[s.category] || '';
 
   const el = document.createElement('div');
   el.className = 'story-file-wrapper';
@@ -2781,9 +2778,7 @@ function buildCard(s, idx) {
   el.onclick = () => openStory(s.id);
 
   el.innerHTML = `
-    <div class="story-folder-tab">
-      <span class="story-folder-tab-num">${tabLabel}</span>
-      <span class="story-folder-tab-sep"></span>
+    <div class="story-folder-tab ${tabCls}">
       <span class="story-folder-tab-label">${s.category || ''}</span>
       <span class="story-folder-tab-arrow">›</span>
     </div>
