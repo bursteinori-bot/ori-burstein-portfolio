@@ -761,6 +761,21 @@
       width: 11px; height: 11px;
       stroke: currentColor; fill: none; stroke-width: 1.8;
     }
+    .filter-btn.filter-random {
+      border-radius: 20px;
+      border-color: rgba(200,185,160,0.18);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .filter-btn.filter-random svg {
+      width: 11px; height: 11px;
+      flex-shrink: 0;
+    }
+    .filter-btn.filter-random:hover {
+      border-color: rgba(200,185,160,0.4);
+      color: rgba(238,228,210,0.9);
+    }
     /* separator dot */
     .filter-sep {
       width: 3px; height: 3px;
@@ -1806,7 +1821,6 @@
 
 <!-- STORIES -->
 <section id="content" class="section" dir="rtl">
-  <div class="section-label">סיפורים</div>
 
   <!-- FILTER BAR -->
   <div id="stories-filter">
@@ -1815,6 +1829,10 @@
     <button class="filter-btn" data-filter="ביקורת">ביקורות</button>
     <button class="filter-btn" data-filter="פרויקט">פרויקטים</button>
     <span class="filter-sep"></span>
+    <button class="filter-btn filter-random" onclick="openRandomStory()" title="פתח פוסט אקראי">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/></svg>
+      אקראי
+    </button>
     <button class="filter-btn filter-search" onclick="toggleSearch()">
       <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
       חיפוש
@@ -3062,6 +3080,18 @@ function applyFilter(searchTerm = '') {
 
 function searchStories(val) {
   applyFilter(val);
+}
+
+function openRandomStory() {
+  if (!STORIES || !STORIES.length) return;
+  const pool = activeFilter === 'הכל'
+    ? STORIES
+    : STORIES.filter(s => s.category === activeFilter);
+  if (!pool.length) return;
+  const pick = pool[Math.floor(Math.random() * pool.length)];
+  const btn = document.querySelector('.filter-btn.filter-random');
+  if (btn) { btn.style.transform = 'rotate(180deg)'; setTimeout(() => btn.style.transform = '', 400); }
+  openStory(pick.id);
 }
 
 let searchOpen = false;
