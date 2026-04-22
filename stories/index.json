@@ -36,6 +36,18 @@
     "projectUrl": "projects/stoptolook.html"
   },
   {
+    "id": 5,
+    "slug": "black-mirror",
+    "title": "מראה שחורה — מה לראות הערב?",
+    "category": "פרויקט",
+    "tabLabel": "ה׳",
+    "badge": "05",
+    "date": "2025-04",
+    "teaser": "גררו פרקים ימינה אם ראיתם, שמאלה אם לא — וקבלו המלצה מותאמת אישית לצפייה הבאה.",
+    "cover": "https://image.tmdb.org/t/p/w500/seN6rRfN0I6n8iDXjlSMk1QjNcq.jpg",
+    "projectUrl": "projects/blackmirror.html"
+  },
+  {
     "id": 3,
     "slug": "euphoria-season-3",
     "title": "אופוריה עונה שלוש (ביקורת מתגלגלת)",

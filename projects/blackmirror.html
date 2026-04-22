@@ -1,0 +1,1180 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>מראה שחורה — מה לראות הערב?</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&display=swap" rel="stylesheet">
+  <style>
+    @font-face { font-family:'Yarden'; src:url('../YardenAlefAlefAlef/web/yarden-regular-alefalefalef.woff2') format('woff2'); font-weight:400; }
+    @font-face { font-family:'Yarden'; src:url('../YardenAlefAlefAlef/web/yarden-bold-alefalefalef.woff2')   format('woff2'); font-weight:700; }
+
+    /* ── THEME ──────────────────────────────────────────── */
+    :root {
+      --bg:#09090c; --bg2:#0d0d12; --card:#141417; --card2:#1c1c24;
+      --text:#e2e2e8; --text2:rgba(226,226,232,.54); --text3:rgba(226,226,232,.28);
+      --border:rgba(255,255,255,.07); --acc:#00d4ff;
+      --acc-d:rgba(0,212,255,.10); --acc-b:rgba(0,212,255,.28);
+      --like:#4ddc88; --dislike:#ff5050; --love:#ffd040;
+      --shadow:rgba(0,0,0,.75);
+    }
+    [data-theme="light"] {
+      --bg:#f4f2ef; --bg2:#ebe8e3; --card:#ffffff; --card2:#f7f5f1;
+      --text:#1c1a18; --text2:rgba(28,26,24,.54); --text3:rgba(28,26,24,.3);
+      --border:rgba(0,0,0,.09); --acc:#006fa6;
+      --acc-d:rgba(0,111,166,.09); --acc-b:rgba(0,111,166,.24);
+      --like:#1a9e52; --dislike:#cc2222; --love:#b8860b;
+      --shadow:rgba(0,0,0,.18);
+    }
+
+    /* ── RESET ──────────────────────────────────────────── */
+    *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
+    html,body { width:100%; height:100%; overflow:hidden; background:var(--bg); }
+    body {
+      /* Yarden for Hebrew, Cormorant Garamond overrides English elements explicitly */
+      font-family:'Yarden',serif; color:var(--text);
+      -webkit-font-smoothing:antialiased; direction:rtl;
+      user-select:none; transition:background .3s,color .3s;
+    }
+    a { color:inherit; text-decoration:none; }
+
+    /* ── LAYOUT ─────────────────────────────────────────── */
+    #app { width:100%; height:100%; display:flex; flex-direction:column; }
+
+    /* ── FILTER BAR ─────────────────────────────────────── */
+    #filter-bar {
+      display:flex; flex-direction:column; flex-shrink:0;
+      border-bottom:1px solid var(--border); background:var(--bg2);
+    }
+    .fb-chips {
+      display:flex; align-items:center; gap:5px; flex-wrap:wrap;
+      padding:6px 12px 4px; direction:rtl; min-height:0;
+    }
+    .fb-meta {
+      display:inline-flex; align-items:center; gap:8px; direction:rtl;
+    }
+    .fchip {
+      display:inline-flex; align-items:center; gap:3px;
+      padding:4px 10px; border-radius:20px; white-space:nowrap; flex-shrink:0;
+      border:1px solid var(--border); background:transparent;
+      color:var(--text2); font-size:.7rem; font-family:'Yarden',serif;
+      cursor:pointer; transition:all .2s; direction:rtl;
+    }
+    .fchip:hover { border-color:var(--text3); color:var(--text); }
+    .fchip.on { background:var(--acc-d); border-color:var(--acc-b); color:var(--acc); }
+    /* Intensity chip colors */
+    .fchip.mild.on     { background:rgba(50,200,90,.12);  border-color:rgba(50,200,90,.35);  color:#6eda90; }
+    .fchip.moderate.on { background:rgba(200,150,25,.12); border-color:rgba(200,150,25,.35); color:#ffb840; }
+    .fchip.intense.on  { background:rgba(220,60,40,.12);  border-color:rgba(220,60,40,.35);  color:#ff7060; }
+    .fchip .fi { font-size:.78rem; }
+    .fb-sep { width:1px; height:14px; background:var(--border); flex-shrink:0; align-self:center; }
+    /* Stats in filter bar */
+    .fb-stat {
+      font-size:.66rem; color:var(--text3); white-space:nowrap; flex-shrink:0;
+      direction:ltr; unicode-bidi:embed;
+    }
+    .fb-stat b { color:var(--text2); }
+    .fb-likes {
+      font-size:.66rem; color:var(--text3); white-space:nowrap; flex-shrink:0;
+      direction:ltr; unicode-bidi:embed;
+    }
+    .fb-likes b { color:var(--like); }
+    .fb-reset {
+      font-size:.66rem; color:rgba(255,80,80,.45); background:transparent;
+      border:1px solid rgba(255,80,80,.18); border-radius:14px;
+      cursor:pointer; padding:3px 9px; transition:all .2s; flex-shrink:0;
+      font-family:'Yarden',serif;
+    }
+    .fb-reset:hover { border-color:rgba(255,80,80,.5); color:rgba(255,80,80,.9); }
+    /* App title chip */
+    .fb-app-title {
+      font-family:'Yarden',serif; font-size:.6rem; font-weight:700;
+      color:var(--text3); background:var(--card2); border:1px solid var(--border);
+      padding:3px 9px; border-radius:7px; flex-shrink:0; white-space:nowrap;
+      letter-spacing:.03em; align-self:center;
+    }
+    /* Row separator */
+    #fb-intensity-row {
+      border-top:1px solid var(--border);
+      background:rgba(255,255,255,.018);
+      padding-top:5px;
+    }
+    [data-theme="light"] #fb-intensity-row {
+      background:rgba(0,0,0,.025);
+    }
+
+    /* ── MAIN ───────────────────────────────────────────── */
+    #main {
+      flex:1; display:flex; flex-direction:column; align-items:center;
+      justify-content:center; padding:12px 10px 8px; overflow:hidden; min-height:0;
+    }
+
+    /* ── CARD STACK ─────────────────────────────────────── */
+    #card-stack { position:relative; width:100%; max-width:370px; height:510px; flex-shrink:0; }
+
+    /* ── CARD ───────────────────────────────────────────── */
+    .ep-card {
+      position:absolute; inset:0; border-radius:18px; cursor:grab;
+      transform-origin:bottom center; transition:transform .12s ease;
+      box-shadow:0 18px 60px var(--shadow); perspective:1200px; touch-action:none;
+    }
+    .ep-card:active { cursor:grabbing; }
+    .ep-card.dragging { transition:none; }
+    .ep-card:first-child  { z-index:3; }
+    .ep-card:nth-child(2) { z-index:2; transform:scale(.955) translateY(10px); }
+    .ep-card:nth-child(3) { z-index:1; transform:scale(.91)  translateY(20px); }
+    .ep-card.fly-r { transition:transform .38s ease,opacity .38s ease !important; transform:translateX(170%) rotate(28deg)   !important; opacity:0 !important; }
+    .ep-card.fly-l { transition:transform .38s ease,opacity .38s ease !important; transform:translateX(-170%) rotate(-28deg) !important; opacity:0 !important; }
+    .ep-card.fly-u { transition:transform .38s ease,opacity .38s ease !important; transform:translateY(-150%) scale(.85)     !important; opacity:0 !important; }
+    .ep-card.spring { transition:transform .45s cubic-bezier(.34,1.56,.64,1) !important; }
+
+    /* ── FLIP ───────────────────────────────────────────── */
+    .flip-inner {
+      width:100%; height:100%; transform-style:preserve-3d;
+      transition:transform .55s cubic-bezier(.4,0,.2,1); position:relative; border-radius:18px;
+    }
+    .flip-inner.flipped { transform:rotateY(180deg); }
+    .flip-f,.flip-b {
+      position:absolute; inset:0; border-radius:18px; overflow:hidden;
+      backface-visibility:hidden; -webkit-backface-visibility:hidden; background:var(--card);
+    }
+    .flip-b {
+      transform:rotateY(180deg); display:flex; flex-direction:column;
+      padding:18px 16px 14px; overflow-y:auto;
+      scrollbar-width:thin; scrollbar-color:var(--border) transparent;
+    }
+
+    /* Front — image */
+    .card-img-wrap { position:relative; width:100%; height:64%; overflow:hidden; border-radius:18px 18px 0 0; }
+    .card-img { width:100%; height:100%; object-fit:cover; display:block; pointer-events:none; }
+    .card-img-fb {
+      position:absolute; inset:0; display:none; align-items:center; justify-content:center;
+      font-size:2.5rem; color:var(--text3);
+    }
+    .card-img-overlay {
+      position:absolute; inset:0;
+      background:linear-gradient(180deg, transparent 45%, rgba(0,0,0,.18) 70%, var(--card) 100%);
+      pointer-events:none;
+    }
+
+    /* Front — body */
+    .card-body {
+      height:36%; padding:8px 14px 10px; background:var(--card);
+      display:flex; flex-direction:column; justify-content:space-between;
+    }
+    .card-row1 { display:flex; align-items:center; justify-content:space-between; gap:5px; }
+    .c-badge {
+      font-size:.57rem; font-weight:600; letter-spacing:.07em;
+      color:var(--acc); background:var(--acc-d); border:1px solid var(--acc-b);
+      padding:2px 7px; border-radius:9px; white-space:nowrap;
+    }
+    .c-rt {
+      font-size:.63rem; font-weight:600; padding:2px 6px; border-radius:8px; white-space:nowrap;
+    }
+    /* fresh = good (≥60%) → green; rotten = bad (<60%) → reddish */
+    .c-rt.fresh  { background:rgba(60,180,80,.16);  color:#66dd88; }
+    .c-rt.rotten { background:rgba(180,60,40,.16);  color:#ff8070; }
+
+    /* Combined title line: Hebrew / English */
+    .c-title-row {
+      margin-top:3px; margin-bottom:2px; line-height:1.3;
+      display:flex; align-items:baseline; flex-wrap:wrap; gap:0;
+    }
+    .c-title-he-p {
+      font-family:'Yarden',serif; font-size:1rem; font-weight:700; color:var(--text);
+    }
+    .c-title-sep {
+      font-family:'Cormorant Garamond',serif; font-size:1rem; font-weight:300;
+      color:var(--text3); margin:0 5px;
+    }
+    .c-title-en-p {
+      font-family:'Cormorant Garamond',serif; font-style:italic;
+      font-size:1rem; font-weight:300; color:var(--text2);
+    }
+    .c-bottom { display:flex; align-items:center; gap:6px; flex-wrap:wrap; }
+    .c-stars { color:var(--love); font-size:.58rem; letter-spacing:.02em; }
+    .c-rnum  { font-size:.65rem; color:var(--text3); }
+    .c-tags  { display:flex; flex-wrap:wrap; gap:3px; margin-top:2px; }
+    .match-pill {
+      font-size:.58rem; font-weight:600; padding:2px 7px; border-radius:8px;
+      white-space:nowrap; margin-right:auto;
+    }
+    .match-pill.high { background:rgba(77,220,136,.15); color:var(--like); }
+    .match-pill.med  { background:rgba(0,212,255,.10);   color:var(--acc);  }
+    .match-pill.warn { background:rgba(255,80,80,.12);   color:var(--dislike); }
+    .flip-hint {
+      font-size:.56rem; color:var(--text3); text-align:center; margin-top:3px;
+      letter-spacing:.04em;
+    }
+
+    /* Tags */
+    .tag { font-size:.56rem; font-weight:600; padding:2px 6px; border-radius:7px; }
+    .tag-horror    { background:rgba(200,40,40,.16);  color:#ff8070; }
+    .tag-scifi     { background:rgba(40,120,210,.16); color:#80c0ff; }
+    .tag-darkHumor { background:rgba(155,70,220,.16); color:#cc88ff; }
+    .tag-romance   { background:rgba(200,70,130,.16); color:#ff90b8; }
+    .tag-thriller  { background:rgba(200,150,25,.16); color:#ffc050; }
+    .tag-satire    { background:rgba(50,200,90,.16);  color:#60ee80; }
+    .tag-future    { background:rgba(0,200,200,.16);  color:#50ffff; }
+    .tag-anthology { background:rgba(210,130,50,.16); color:#ffaa55; }
+
+    /* Swipe overlay */
+    .swipe-ov {
+      position:absolute; inset:0; border-radius:18px; pointer-events:none;
+      opacity:0; z-index:10; display:flex; align-items:center; justify-content:center;
+    }
+    .swipe-lbl {
+      font-family:'Yarden',serif; font-size:1.7rem; font-weight:700;
+      padding:8px 22px; border-radius:12px; border:3px solid; display:none;
+    }
+    .swipe-lbl.like    { color:var(--like);    border-color:var(--like);    transform:rotate(-12deg); }
+    .swipe-lbl.dislike { color:var(--dislike); border-color:var(--dislike); transform:rotate(12deg); }
+
+    /* Back face */
+    .back-season {
+      font-size:.6rem; font-weight:600; letter-spacing:.1em;
+      color:var(--acc); margin-bottom:6px;
+    }
+    .back-title-en {
+      font-family:'Cormorant Garamond',serif; font-size:1.48rem; font-weight:300;
+      color:var(--text); line-height:1.2; margin-bottom:3px;
+    }
+    .back-title-he {
+      font-family:'Yarden',serif; font-size:.95rem; color:var(--text2); margin-bottom:10px;
+    }
+    .back-rt-row { display:flex; align-items:center; gap:6px; margin-bottom:12px; }
+    .back-stars { color:var(--love); font-size:.65rem; }
+    .back-rnum  { font-size:.7rem; color:var(--text3); }
+    .back-divider { flex:1; height:1px; background:var(--border); }
+    .back-rt-badge { font-size:.68rem; font-weight:600; padding:2px 7px; border-radius:8px; }
+    .back-rt-badge.fresh  { background:rgba(60,180,80,.16);  color:#66dd88; }
+    .back-rt-badge.rotten { background:rgba(180,60,40,.16);  color:#ff8070; }
+    .back-summary {
+      font-size:.8rem; line-height:1.78; color:var(--text2); margin-bottom:10px; flex:1;
+    }
+    .back-blurb {
+      font-family:'Yarden',serif; font-size:.8rem; line-height:1.6; color:var(--text2);
+      border-right:2px solid var(--acc-b); padding-right:9px; margin-bottom:8px;
+    }
+    .back-blurb.warn { border-color:rgba(255,80,80,.35); color:rgba(255,160,140,.9); }
+    .back-blurb.pos  { border-color:rgba(77,220,136,.35); color:rgba(150,235,185,.9); }
+    .back-links { display:flex; gap:6px; flex-wrap:wrap; margin-top:10px; }
+    .back-link {
+      display:inline-flex; align-items:center; gap:5px;
+      font-size:.7rem; font-weight:500; padding:5px 11px; border-radius:18px;
+      border:1px solid var(--border); color:var(--text2); background:transparent;
+      transition:all .18s; cursor:pointer; text-decoration:none;
+    }
+    .back-link:hover { border-color:var(--acc-b); color:var(--acc); background:var(--acc-d); }
+    .bl-icon { font-size:.85rem; }
+
+    /* ── DECK EMPTY ─────────────────────────────────────── */
+    #deck-done {
+      display:none; flex-direction:column; align-items:center;
+      text-align:center; padding:28px; max-width:290px;
+    }
+    #deck-done .di { font-size:3rem; margin-bottom:16px; }
+    #deck-done h3 { font-family:'Yarden',serif; font-size:1.3rem; color:var(--text); margin-bottom:10px; }
+    #deck-done p { font-size:.84rem; color:var(--text2); line-height:1.7; margin-bottom:20px; }
+    .btn-reset {
+      background:var(--acc-d); border:1px solid var(--acc-b); color:var(--acc);
+      padding:10px 26px; border-radius:24px;
+      font-family:'Yarden',serif; font-size:.9rem; cursor:pointer; transition:all .2s;
+    }
+    .btn-reset:hover { background:rgba(0,212,255,.18); }
+
+    /* ── ACTIONS ────────────────────────────────────────── */
+    #act-btns {
+      /* LTR so buttons are always: ✕ left → לא ראיתי → ⭐ → ❤ right */
+      display:flex; direction:ltr; align-items:center;
+      justify-content:center; gap:10px; margin-top:14px;
+    }
+    .act {
+      border-radius:50%; border:2px solid; background:transparent;
+      cursor:pointer; display:flex; align-items:center; justify-content:center;
+      transition:all .2s; font-size:1.1rem; width:50px; height:50px; flex-shrink:0;
+    }
+    .act:hover  { transform:scale(1.12); }
+    .act:active { transform:scale(.92);  }
+    .act.dislike { border-color:rgba(255,80,80,.35);  color:var(--dislike); }
+    .act.dislike:hover { background:rgba(255,80,80,.09); border-color:var(--dislike); }
+    .act.like    { border-color:rgba(77,220,136,.35); color:var(--like); }
+    .act.like:hover    { background:rgba(77,220,136,.09); border-color:var(--like); }
+    .act.love {
+      width:44px; height:44px; border-color:rgba(255,208,64,.35); color:var(--love); font-size:1rem;
+    }
+    .act.love:hover    { background:rgba(255,208,64,.09); border-color:var(--love); }
+    .act.unseen {
+      width:auto; height:38px; border-radius:22px; padding:0 14px;
+      border-color:var(--border); color:var(--text3);
+      font-size:.76rem; font-family:'Yarden',serif;
+    }
+    .act.unseen:hover { border-color:var(--text2); color:var(--text2); }
+
+    /* Hint row — LTR so left/right arrows match visual button positions */
+    .act-hint {
+      display:flex; direction:ltr; justify-content:space-between; align-items:center;
+      width:100%; max-width:370px; margin-top:7px; padding:0 6px;
+    }
+    .act-hint span { font-size:.58rem; color:var(--text3); }
+
+    /* ── TOAST ──────────────────────────────────────────── */
+    #toast {
+      position:fixed; bottom:105px; left:50%;
+      transform:translateX(-50%) translateY(8px);
+      background:var(--card2); border:1px solid rgba(77,220,136,.35);
+      border-radius:16px; padding:12px 16px 10px;
+      max-width:310px; width:88%; z-index:200;
+      box-shadow:0 12px 40px var(--shadow);
+      text-align:center; direction:rtl;
+      opacity:0; pointer-events:none;
+      transition:opacity .3s, transform .3s;
+    }
+    #toast.show { opacity:1; pointer-events:auto; transform:translateX(-50%) translateY(0); }
+    .toast-title { font-size:.82rem; font-weight:700; color:var(--like); margin-bottom:5px; }
+    .toast-body  { font-size:.76rem; color:var(--text2); line-height:1.6; }
+    .toast-close {
+      display:inline-block; margin-top:8px; font-size:.66rem;
+      color:var(--text3); cursor:pointer; padding:2px 10px;
+      border:1px solid var(--border); border-radius:10px; background:transparent;
+      font-family:'Yarden',serif;
+    }
+    .toast-close:hover { color:var(--text2); border-color:var(--text2); }
+
+    /* ── MOBILE ─────────────────────────────────────────── */
+    @media (max-width:580px) {
+      #card-stack { max-width:300px; height:420px; }
+      #act-btns { gap:7px; margin-top:10px; }
+      .act { width:44px; height:44px; font-size:1rem; }
+      .act.love { width:39px; height:39px; font-size:.95rem; }
+      .act.unseen { height:35px; padding:0 11px; font-size:.72rem; }
+      .act-hint { max-width:300px; }
+      .fchip { padding:3px 8px; font-size:.66rem; }
+    }
+
+    ::-webkit-scrollbar { width:3px; }
+    ::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+  </style>
+</head>
+<body>
+<div id="app">
+
+  <div id="filter-bar">
+    <div class="fb-chips" id="fb-genre-row">
+      <span class="fb-app-title">מראה שחורה</span>
+      <!-- genre chips injected by buildFilters() -->
+    </div>
+    <div class="fb-chips" id="fb-intensity-row" style="padding-top:0">
+      <!-- intensity chips injected by buildFilters() -->
+      <div class="fb-sep" style="height:12px"></div>
+      <div class="fb-meta">
+        <span class="fb-likes"><b id="like-count">0</b> ❤</span>
+        <span class="fb-stat"><b id="done-count">0</b>/<b id="total-count">—</b></span>
+        <button class="fb-reset" onclick="resetAll()">↺ אפס</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">
+    <div class="toast-title" id="toast-title"></div>
+    <div class="toast-body"  id="toast-body"></div>
+    <button class="toast-close" onclick="hideToast()">המשך</button>
+  </div>
+
+  <div id="main">
+    <div id="card-stack"></div>
+    <div id="deck-done">
+      <div class="di">🎬</div>
+      <h3>סיימת לדרג!</h3>
+      <p id="done-msg">דרגת את כל הפרקים. אפשר לאפס ולהתחיל מחדש.</p>
+      <button class="btn-reset" onclick="resetAll()">אפס הכל</button>
+    </div>
+    <div id="act-btns">
+      <!-- DOM order: dislike (left) → unseen → love → like (right) -->
+      <button class="act dislike" onclick="rateTop('disliked')" title="לא אהבתי">✕</button>
+      <button class="act unseen"  onclick="rateTop('unseen')"   title="לא ראיתי">לא ראיתי</button>
+      <button class="act love"    onclick="rateTop('loved')"    title="ממש אהבתי">⭐</button>
+      <button class="act like"    onclick="rateTop('liked')"    title="אהבתי">❤</button>
+    </div>
+    <div class="act-hint">
+      <span>לא אהבתי ←</span>
+      <span>הקש לסיכום</span>
+      <span>→ אהבתי</span>
+    </div>
+  </div>
+
+</div>
+<script>
+// ─── DATA ─────────────────────────────────────────────────────────────────────
+const T       = 'https://image.tmdb.org/t/p/w780';
+const IMDB_B  = 'https://www.imdb.com/title/';
+const WIKI_B  = 'https://en.wikipedia.org/wiki/';
+const RT_B    = 'https://www.rottentomatoes.com/tv/black_mirror/';
+
+function heSearch(ep) {
+  return 'https://www.google.com/search?q=' + encodeURIComponent('Black Mirror "' + ep.he + '" ביקורת') + '&lr=lang_iw';
+}
+
+// intensity: 1=קל לצפייה, 2=בינוני, 3=ללב חזק
+const EPISODES = [
+  // ── S1 ──────────────────────────────────────────────────────────────────────
+  { id:'s1e1',s:1,e:1,y:2011, en:'The National Anthem',           he:'ההמנון הלאומי',
+    tags:['thriller','satire','darkHumor'], r:7.5, rt:100, intensity:3,
+    imdb:'tt2095904', wiki:'The_National_Anthem_(Black_Mirror)', rtSlug:'s01/e01',
+    review:'מה קורה כשהאינטרנט הופך לנשק? פרק פוליטי ומטריד שמשאיר טעם רע בפה — בדיוק כמו שצריך.',
+    summary:'ראש ממשלת בריטניה מקבל אולטימטום: בצע מעשה גס ומשפיל בשידור חי — או שהנסיכה האהובה תמות. הצוות שלו נאבק למצוא מוצא, אבל הרשתות החברתיות מאיצות ומסיטות כל ניסיון. הפרק הוא ביקורת חדה על כוח דעת הקהל הדיגיטלי — ועל איך ריבונות מנהיגים מתמוטטת מול ויראליות.',
+    img:T+'/9w27Lgeq8KVxhz4ysygT6ranxf1.jpg', gr:'linear-gradient(135deg,#1a0808,#2d1515)',
+    sim:['s3e3','s5e2','s2e2'] },
+
+  { id:'s1e2',s:1,e:2,y:2011, en:'Fifteen Million Merits',        he:'חמישה עשר מיליון מריטים',
+    tags:['scifi','future','satire','thriller'], r:9, rt:100, intensity:2,
+    imdb:'tt2026006', wiki:'Fifteen_Million_Merits', rtSlug:'s01/e02',
+    review:'עתיד שבו כולם רוכבים על אופניים כדי לממן את קיומם — וחלום אחד פוגש מציאות אכזרית.',
+    summary:'בעולם קלויסטרופובי שבו כולם רוכבים על אופניים לצבור "מריטים" לשרידות, גבר אחד מנסה לעזור לאישה בעלת קול להגיע לבמה — ומגלה שלמערכת יש תוכניות אחרות לה. ביקורת מבריקה על תעשיית הבידור, ריאליטי, ועל הדרך שבה קפיטליזם מכשיר את הכישרון לצריכה.',
+    img:T+'/c62HKSbeTRkatK223O3m58CmmPd.jpg', gr:'linear-gradient(135deg,#080f1a,#152030)',
+    sim:['s3e1','s4e1','s6e1'] },
+
+  { id:'s1e3',s:1,e:3,y:2011, en:'The Entire History of You',     he:'כל ההיסטוריה שלך',
+    tags:['scifi','future','thriller','romance'], r:9, rt:100, intensity:3,
+    imdb:'tt2089016', wiki:'The_Entire_History_of_You', rtSlug:'s01/e03',
+    review:'מה היית עושה אם יכולת להריץ שוב כל זיכרון? מותחן זוגי שהופך לסיוט — בהדרגה ובבלתי-נסבלות.',
+    summary:'בעולם שבו שתל בגרון מתעד ומשמר כל זיכרון, גבר מתחיל לחשוד בנאמנות אשתו אחרי ערב חברתי. הוא שב ומריץ זיכרונות בחיפוש פרטים שיוכיחו — ולא מצליח לעצור. המותחן הזוגי הזה הוא האנסי ביותר מהסדרה: קנאה, אמון, ועד כמה זיכרון יכול להפוך לאויב.',
+    img:T+'/66iZjymrsj44nJnJLveyOv5sno7.jpg', gr:'linear-gradient(135deg,#0d0d1a,#1a1a2e)',
+    sim:['s4e4','s2e1','s4e2'] },
+
+  // ── S2 ──────────────────────────────────────────────────────────────────────
+  { id:'s2e1',s:2,e:1,y:2013, en:'Be Right Back',                 he:'תיכף חוזר',
+    tags:['scifi','romance'], r:9, rt:100, intensity:2,
+    imdb:'tt2290780', wiki:'Be_Right_Back_(Black_Mirror)', rtSlug:'s02/e01',
+    review:'אחד הפרקים האנושיים ביותר בסדרה — על אבל, על אהבה, ועל מה שאנחנו באמת רוצים שיישאר.',
+    summary:'אחרי שבן-זוגה מת בתאונה, אישה צעירה מגלה שירות שמייצר גרסה דיגיטלית של אהובה מפוסטים ברשת. מה שמתחיל כנחמה הופך לחקירה כאובה של מה זה אומר לאהוב אדם — לא אלגוריתם שמחקה אותו. הסיום אינו קטסטרופלי, אבל עמוק ועצוב בדרך שמשאירה חותם.',
+    img:T+'/ltgvZMI9y73GOlBqoOFiXlot87V.jpg', gr:'linear-gradient(135deg,#0a1520,#152535)',
+    sim:['s7e4','s7e1','s3e4'] },
+
+  { id:'s2e2',s:2,e:2,y:2013, en:'White Bear',                    he:'הדוב הלבן',
+    tags:['horror','thriller','darkHumor'], r:9.5, rt:100, intensity:3,
+    imdb:'tt2585380', wiki:'White_Bear_(Black_Mirror)', rtSlug:'s02/e02',
+    review:'לא ניתן לספר לך הרבה. פרק שמשנה כיוון בצורה חדה ומחשמלת — עדיף לא לדעת כלום מראש.',
+    summary:'אישה מתעוררת ללא זיכרון — ועל עקבותיה רודפים. כולם סביבה מצלמים בטלפון, אף אחד לא מתערב. הפרק הוא מרדף שמגיע לרגע שבו כל מה שחשבת שהבנת הופך לחלוטין. ביקורת מוחצת על ציד-כשפים חברתי, נקמה, ויצר הצפייה שלנו עצמנו.',
+    img:T+'/lSua0MfjmtLb8LKICqIiaGkcieL.jpg', gr:'linear-gradient(135deg,#101010,#2a1a1a)',
+    sim:['s3e3','s4e6','s7e2'] },
+
+  { id:'s2e3',s:2,e:3,y:2013, en:'The Waldo Moment',              he:'רגע וולדו',
+    tags:['satire','darkHumor'], r:6, rt:55, intensity:1,
+    imdb:'tt2621310', wiki:'The_Waldo_Moment', rtSlug:'s02/e03',
+    review:'קריקטורה כחולה שמנצחת בפוליטיקה. הפרק הפחות מוצלח בסדרה, אבל נביאי בצורה מפחידה.',
+    summary:'קריקטורה עם אגרוף של קומיקאי מתחילה לנגח פוליטיקאים ברשת — ומגלה שהקהל אוהב אותה יותר ממועמדים אמיתיים. ביקורת פוליטית שנביאה את עידן הפופוליזם הדיגיטלי. לא החזק מבין הפרקים, אבל כיום מרגיש רלוונטי מאי פעם.',
+    img:T+'/hSEwesgbIQWoMucQdc55c4qaAQM.jpg', gr:'linear-gradient(135deg,#0a1a0a,#1a2a1a)',
+    sim:['s6e1','s3e1','s5e3'] },
+
+  { id:'s2e4',s:2,e:4,y:2014, en:'White Christmas',               he:'כריסמס לבן',
+    special:'ספיישל 2014',
+    tags:['scifi','horror','thriller','anthology'], r:10, rt:100, intensity:3,
+    imdb:'tt3973198', wiki:'White_Christmas_(Black_Mirror)', rtSlug:'s02/e04',
+    review:'ג\'ון המ בשיא כוחו, שלושה סיפורים שמשתלבים, ואחד הסיומים הכי מטרידים בסדרה.',
+    summary:'בקביניות מבודדת בשלג שני גברים משתפים סיפורים מהעבר — וכל סיפור חושף עולם דיסטופי נפרד. ג\'ון המ בביצוע מאסטרי ושלושת הסיפורים מחוברים בסיום עם אחת ההכאות הנפשיות הגדולות בסדרה. ספיישל שעדיף לראות אחרי כל שאר הפרקים.',
+    img:T+'/12NX2uJH7Op1zDnGQKZacnCykql.jpg', gr:'linear-gradient(135deg,#05101a,#0e2030)',
+    sim:['s4e6','s6e5','s1e3'] },
+
+  // ── S3 ──────────────────────────────────────────────────────────────────────
+  { id:'s3e1',s:3,e:1,y:2016, en:'Nosedive',                      he:'צניחה חופשית',
+    tags:['scifi','future','satire','darkHumor'], r:9, rt:100, intensity:1,
+    imdb:'tt5497778', wiki:'Nosedive_(Black_Mirror)', rtSlug:'s03/e01',
+    review:'כולם מדרגים את כולם — ועל ציון נמוך מדי תלוי גורלך. פרק פסטלי ומפחיד שמרגיש קרוב מדי.',
+    summary:'בעולם שבו כל אינטראקציה מדורגת בסמארטפון, ציון חברתי גבוה פותח דלתות. אישה עם 4.2 מנסה להגיע ל-4.5 — ובמסע אל חתונת חברה ישנה, הכל מתפרק. פלטה צבעונית שמנוגדת לחדות המסר, ובריס דאלס הוורד בביצוע פנטסטי.',
+    img:T+'/dmEDQliQbapSOcbdu0c2KtmIVna.jpg', gr:'linear-gradient(135deg,#100820,#201535)',
+    sim:['s1e2','s6e1','s4e1'] },
+
+  { id:'s3e2',s:3,e:2,y:2016, en:'Playtest',                      he:'בדיקת משחק',
+    tags:['horror','scifi','thriller'], r:7.5, rt:89, intensity:3,
+    imdb:'tt5582426', wiki:'Playtest_(Black_Mirror)', rtSlug:'s03/e02',
+    review:'גיימר שמכניס שבב לראש לצורך ניסוי. מה שמתחיל כמשחק הופך לאימה שגוברת מדקה לדקה.',
+    summary:'אמריקאי שנמנע מלהתקשר לאמא שלו אחרי מות אביו מסכים לניסוי של חברת גיימינג שמניחה שתל בראשו ויוצרת אימה מותאמת אישית. הניסוי עובד — ומתחיל להסתבך. פרק שמנהל שיחה חכמה עם ז\'אנר ה-Haunted House ועושה ממנו משהו הרבה יותר אישי.',
+    img:T+'/v0zfbxuUnQ4YQ3hkRq7EvFsEKQN.jpg', gr:'linear-gradient(135deg,#0a0a0a,#1a0a1a)',
+    sim:['s7e5','s4e5','s4e1'] },
+
+  { id:'s3e3',s:3,e:3,y:2016, en:'Shut Up and Dance',             he:'שתוק ורקוד',
+    tags:['thriller','horror'], r:9, rt:100, intensity:3,
+    imdb:'tt5582390', wiki:'Shut_Up_and_Dance_(Black_Mirror)', rtSlug:'s03/e03',
+    review:'מותחן שמרגיש כמו מרתון ריצה — אי אפשר לעצור. מזעזע ומחשיב את הצופה עד הסוף.',
+    summary:'נער שנתפס על ידי האקרים מקבל הוראות לבצע משימות — וכל אחת גרועה מקודמתה. תחרות מתח שלא מוצאת מקום לנשום, ורצועת שאלות מוסריות שמחריפות. הסוף הופך הכל — ומי שחשב שהבין לאן הפרק הולך, לרוב לא הבין.',
+    img:T+'/MU0lsD08pcuwaYMGOQMFGFWJGg.jpg', gr:'linear-gradient(135deg,#0d0a0a,#201515)',
+    sim:['s2e2','s4e3','s5e2'] },
+
+  { id:'s3e4',s:3,e:4,y:2016, en:'San Junipero',                  he:'סן חוניפרו',
+    tags:['scifi','romance','future'], r:10, rt:100, intensity:1,
+    imdb:'tt4538916', wiki:'San_Junipero', rtSlug:'s03/e04',
+    review:'סיפור אהבה בין שתי נשים שמסתיר בתוכו עולם שלם. הפרק האהוב ביותר של הסדרה — ובצדק.',
+    summary:'שנות השמונים, בר על חוף הים — ושתי נשים שנפגשות ומתחברות בדרך שמרגישה כמו קסם. הפרק הוא הרבה יותר ממה שנראה בעשר הדקות הראשונות. אחד הפרקים הבודדים בסדרה שמסתיים בתקווה ולא בקרה. גם בכי, כנראה.',
+    img:T+'/iaephQlFeFRJ9Bkxbi4YBB4kcWs.jpg', gr:'linear-gradient(135deg,#1a0a30,#300a50)',
+    sim:['s4e4','s2e1','s7e3'] },
+
+  { id:'s3e5',s:3,e:5,y:2016, en:'Men Against Fire',              he:'גברים נגד אש',
+    tags:['scifi','horror','thriller'], r:8, rt:78, intensity:2,
+    imdb:'tt5582388', wiki:'Men_Against_Fire_(Black_Mirror)', rtSlug:'s03/e05',
+    review:'חייל שנלחם באויב — אבל מה בדיוק הוא רואה? על מניפולציה, פרופגנדה ודה-הומניזציה.',
+    summary:'חיילים בעתיד לוחמים ב"מזיקים" שנראים מפלצתיים. אחד החיילים מתחיל לחוות תקלות בשתל שמחובר למוחו — וגילויים שממיסים כל מה שמסביב. על כמה קל להכשיר אדם להרוג, ועל הפרופגנדה שמאפשרת את זה.',
+    img:T+'/A4g3nH0kYQpqHv1oHBXuTgRgT5u.jpg', gr:'linear-gradient(135deg,#0a100a,#152015)',
+    sim:['s3e6','s4e2','s3e2'] },
+
+  { id:'s3e6',s:3,e:6,y:2016, en:'Hated in the Nation',          he:'שנוא על ידי האומה',
+    tags:['scifi','thriller','future'], r:9, rt:100, intensity:2,
+    imdb:'tt5582382', wiki:'Hated_in_the_Nation_(Black_Mirror)', rtSlug:'s03/e06',
+    review:'מה קורה כשהטרול האינטרנטי מקבל כוח אמיתי? מותחן שמרגיש כמו עונה שלמה בתוך פרק אחד.',
+    summary:'דבורים מכאניות שמחליפות את הדבורים הנכחדות מתחילות להרוג — בסדר של חשבון פומבי ברשתות. חוקרת עוקבת אחרי הפשע עם עוזרת צעירה. 90 דקות שמרגישות כמו מיני-סדרה: מתוחכם, מסוים, עם שיא שיישאר אחרי.',
+    img:T+'/sBrdKKIMwdiFj5Xx8NRzLxqfVkX.jpg', gr:'linear-gradient(135deg,#0a0a10,#15152a)',
+    sim:['s5e2','s1e1','s7e6'] },
+
+  // ── S4 ──────────────────────────────────────────────────────────────────────
+  { id:'s4e1',s:4,e:1,y:2017, en:'USS Callister',                 he:'USS קאליסטר',
+    tags:['scifi','darkHumor','thriller','future'], r:9.5, rt:100, intensity:2,
+    imdb:'tt5710978', wiki:'USS_Callister', rtSlug:'s04/e01',
+    review:'מה אם הבוס שלך העתיק אותך לתוך משחק שרק הוא שולט בו? קוקטייל מושלם של כיף, אימה ומסר.',
+    summary:'מפתח תוכנה מבריק שלא מקבל את הכבוד המגיע לו מוצא פורקן ב-VR שרק הוא שולט בו — אבל לעמיתיו לעבודה יש גרסה שנכלאה שם. קוקטייל של Star Trek, פמיניזם ואלימות פסיכולוגית. שימוש יוצא דופן באסתטיקה נוסטלגית לצורך ביקורת חדה.',
+    img:T+'/dagpqvCO48XDFCUe7I2SYCuXCA1.jpg', gr:'linear-gradient(135deg,#05050f,#101028)',
+    sim:['s1e2','s7e5','s3e1'] },
+
+  { id:'s4e2',s:4,e:2,y:2017, en:'Arkangel',                      he:'ארקנג\'ל',
+    tags:['scifi','horror','thriller'], r:7, rt:78, intensity:2,
+    imdb:'tt6048572', wiki:'Arkangel_(Black_Mirror)', rtSlug:'s04/e02',
+    review:'אמא שמניחה שבב ניטור בבתה לבטחון — ואז הדברים מסתבכים. מותחן אמהי עם ניחוח של שליטה.',
+    summary:'אמא חרדה מתקינה בבתה שתל שמאפשר לה לצפות בכל מה שהבת רואה — ולסנן תכנים מזעזעים. כשהבת גדלה, ה"הגנה" יוצרת פגיעות אחרות. על גבולות בין אהבה לשליטה, ובמחיר שמשלמים ילדים עבור הגנת הורים.',
+    img:T+'/3uXHGkHO5B9icYTxyVRDXoxDldR.jpg', gr:'linear-gradient(135deg,#0f0f18,#1e1e30)',
+    sim:['s3e5','s1e3','s6e2'] },
+
+  { id:'s4e3',s:4,e:3,y:2017, en:'Crocodile',                     he:'תנין',
+    tags:['thriller','horror'], r:7, rt:78, intensity:3,
+    imdb:'tt6048578', wiki:'Crocodile_(Black_Mirror)', rtSlug:'s04/e03',
+    review:'סיפור על אישה שמתקרבת לשפה — ולא יכולה לעצור. אפל ומניפולטיבי עם תפנית שמשאירה פעור פה.',
+    summary:'תאונת פגע-וברח ישנה מאיימת על עתידה של אישה. שינויים קטנים יוצרים סחרור שכל אחד גרוע מקודמו. פרק איסלנדי קר שחוצה קו — ולא מפסיק לחצות. לא לכולם, אבל מי שאוהב נואר אפל.',
+    img:T+'/mvNCd4qfwtdXeRHgvWHRRPUA1TF.jpg', gr:'linear-gradient(135deg,#080f08,#121e12)',
+    sim:['s3e3','s2e2','s6e4'] },
+
+  { id:'s4e4',s:4,e:4,y:2017, en:'Hang the DJ',                   he:'תלו את ה-DJ',
+    tags:['scifi','romance','future'], r:9, rt:100, intensity:1,
+    imdb:'tt5710984', wiki:'Hang_the_DJ_(Black_Mirror)', rtSlug:'s04/e04',
+    review:'אפליקציית דייטינג שמכתיבה עם מי לצאת ולכמה זמן — אבל מה אם תמיד נחזור לאותו אחד?',
+    summary:'פרנק ואמי מנסים לדייט בעולם שבו אפליקציה קובעת להם עם מי לצאת ולכמה זמן — ומשגיחה שלא יתקרבו יותר מדי. אחד הפרקים הנדירים ב-Black Mirror שמסתיים בחיוך. טכנולוגיה, רומנטיקה, ותחושת "הנכון".',
+    img:T+'/zDnYPFIN5ssHrLDGoxEKwPJB3gm.jpg', gr:'linear-gradient(135deg,#0a0520,#150a3a)',
+    sim:['s3e4','s2e1','s7e3'] },
+
+  { id:'s4e5',s:4,e:5,y:2017, en:'Metalhead',                     he:'ראש מתכת',
+    tags:['scifi','horror','thriller'], r:7.5, rt:78, intensity:3,
+    imdb:'tt6399806', wiki:'Metalhead_(Black_Mirror)', rtSlug:'s04/e05',
+    review:'שחור-לבן, מינימליסטי, אכזרי. כלב-רובוט אחד רודף — ואין הסבר, אין רקע, רק בריחה.',
+    summary:'סקוטלנד אחרי-אפוקליפסה: אישה נרדפת על ידי כלב מכאני קטלני. לא יוסבר לך מה קרה לעולם, לא מי היא. רק המרדף. פרק שמחזיק מפלצת עתיד מפחידה ועושה זאת בחסכנות ויזואלית שנדירה בטלוויזיה.',
+    img:T+'/8mMSk4cGfIftbIoA2Mq83LpzYlw.jpg', gr:'linear-gradient(135deg,#050505,#141414)',
+    sim:['s3e3','s3e2','s7e6'] },
+
+  { id:'s4e6',s:4,e:6,y:2017, en:'Black Museum',                  he:'המוזיאון השחור',
+    tags:['horror','thriller','anthology'], r:9, rt:100, intensity:3,
+    imdb:'tt6760658', wiki:'Black_Museum_(Black_Mirror)', rtSlug:'s04/e06',
+    review:'אנתולוגיה של אימה טכנולוגית שמסתיימת בסיום מושחת ומספק. מלא Easter Eggs לאוהבי הסדרה.',
+    summary:'מוזיאון קטן על כביש ממדבר מחזיק חפצים עם טכנולוגיה אפלה — ובעליו משתף אורחת בשלושה סיפורים. מתחיל כמעט כבדיחה ומסתיים בסיום שמספק רגע צדק מהנה. מי שמכיר את הסדרה — יש שם רמזים לפרקים ישנים.',
+    img:T+'/fOKwBPMBSm1B6zc3wkN4hCkbtsf.jpg', gr:'linear-gradient(135deg,#100808,#201010)',
+    sim:['s2e4','s7e4','s6e5'] },
+
+  // ── S5 ──────────────────────────────────────────────────────────────────────
+  { id:'s5e1',s:5,e:1,y:2019, en:'Striking Vipers',               he:'צפעוני תוקפים',
+    tags:['scifi','romance'], r:7, rt:80, intensity:1,
+    imdb:'tt7529770', wiki:'Striking_Vipers', rtSlug:'s05/e01',
+    review:'שני חברים ישנים מגלים קרבה חדשה דרך VR — פרק שחוקר זהות וגבולות בצורה לא שופטת.',
+    summary:'שני ידידים ישנים מוצאים דרך להתחבר מחדש דרך משחק לחימה בVR — ומגלים שהחוויה הדיגיטלית מחשמלת אותם מעל ומעבר. הפרק חוקר זהות, נאמנות וגבולות ביחסים. אינטימי ועדין יותר מרוב הפרקים.',
+    img:T+'/t8uIVDjfCoutXHwIRZoUX8XpNS2.jpg', gr:'linear-gradient(135deg,#050a1a,#0f1a30)',
+    sim:['s3e4','s1e3','s6e3'] },
+
+  { id:'s5e2',s:5,e:2,y:2019, en:'Smithereens',                   he:'לרסיסים',
+    tags:['thriller'], r:7.5, rt:85, intensity:2,
+    imdb:'tt8637304', wiki:'Smithereens_(Black_Mirror)', rtSlug:'s05/e02',
+    review:'איש מחזיק בני ערובה בחברת מדיה חברתית ורוצה לדבר עם המייסד. מותחן עכשווי וכואב.',
+    summary:'נהג לוחץ בני ערובה ודורש לשוחח עם מייסד חברת מדיה חברתית. הפרק מבנה עצמו כמשא-ומתן בין שלוש קבוצות. על כמה כוח יש לחברות טכנולוגיה על חיינו — ועל מחיר חוסר הקשב.',
+    img:T+'/4uXgZa6K1d1wcGk4FtJUO1cCSqi.jpg', gr:'linear-gradient(135deg,#100a0a,#201515)',
+    sim:['s3e6','s1e1','s7e6'] },
+
+  { id:'s5e3',s:5,e:3,y:2019, en:'Rachel, Jack and Ashley Too',   he:'רייצ\'ל, ג\'ק ואשלי טו',
+    tags:['scifi','darkHumor','satire'], r:6, rt:62, intensity:1,
+    imdb:'tt8661840', wiki:'Rachel,_Jack_and_Ashley_Too', rtSlug:'s05/e03',
+    review:'פופ-סטאר, אוהדת גדולה, ורובוט קטן שמחזיק בסוד — עם מיילי סיירוס שמשחקת נגד עצמה.',
+    summary:'ילדה שמעריצה פופ-סטאר מקבלת גרסה-רובוטית שמגלה לה סוד. הפרק הוא ה"קל" של עונה 5 — פחות מדכא, יותר הרפתקה. מיילי סיירוס משחקת נגד הדימוי שלה בכיף רב.',
+    img:T+'/uwLkdgvIT7hvJD2k9FMdiA8MpVX.jpg', gr:'linear-gradient(135deg,#1a0a1a,#2a1030)',
+    sim:['s3e1','s6e1','s2e3'] },
+
+  // ── S6 ──────────────────────────────────────────────────────────────────────
+  { id:'s6e1',s:6,e:1,y:2023, en:'Joan Is Awful',                 he:'ג\'ואן היא נוראית',
+    tags:['scifi','satire','darkHumor','future'], r:8, rt:73, intensity:1,
+    imdb:'tt14551906', wiki:'Joan_Is_Awful', rtSlug:'s06/e01',
+    review:'אישה מגלה שחייה הפכו לסדרה בסטרימינג ללא רשותה. סאטירה חכמה ומאוד אקטואלית.',
+    summary:'ג\'ואן מגלה שחברת סטרימינג ענקית מפיקה סדרה על חייה ללא רשותה — עם שחקנית מפורסמת שמגלמת כל בחירה לא-מחמיאה שלה. ביקורת חדה על הסכמות T&C, על AI ויצירה, ועל מהי פרטיות בעולם של היום.',
+    img:T+'/enqxYxzDUu9oyRGit8GinRlOndW.jpg', gr:'linear-gradient(135deg,#0a0a18,#15152e)',
+    sim:['s3e1','s4e1','s1e2'] },
+
+  { id:'s6e2',s:6,e:2,y:2023, en:'Loch Henry',                    he:'לוך הנרי',
+    tags:['thriller','horror'], r:7, rt:68, intensity:2,
+    imdb:'tt14551910', wiki:'Loch_Henry', rtSlug:'s06/e02',
+    review:'זוג שמגיע לכפר סקוטי מבודד לצלם דוקו — ומגלה יותר ממה שרצה.',
+    summary:'זוג שמגיע לכפר סקוטי מבודד לצלם דוקו-פשע מגלה שיש שם יותר מדי חומר — ושמשפחת אחד מהם קשורה אליו ישירות. חוקר כיצד תעשיית ה-True Crime צמאה לסבל אנושי, ועל המחיר שמשלמים מי שנמצאים בתוכו.',
+    img:T+'/dA9ZWi2Q172vYUVxhKPTarJeDLj.jpg', gr:'linear-gradient(135deg,#080d08,#121c12)',
+    sim:['s4e3','s4e2','s3e3'] },
+
+  { id:'s6e3',s:6,e:3,y:2023, en:'Beyond the Sea',                he:'מעבר לים',
+    tags:['scifi','horror','thriller'], r:8.5, rt:90, intensity:3,
+    imdb:'tt14551908', wiki:'Beyond_the_Sea_(Black_Mirror)', rtSlug:'s06/e03',
+    review:'שני אסטרונאוטים, שתי חיים מקבילות — וטרגדיה שמאלצת אותם לשתף יותר מדי.',
+    summary:'שנות ה-60 בחלל: שני אסטרונאוטים ממשיכים לחיות בכפילויות-גוף על כדור הארץ — עד שטרגדיה משנה את האיזון ביניהם. עד כמה ניתן לתת לאדם גישה לחייך הפרטיים? ביצועים מרשימים של אהרון פול וג\'וש הרטנט.',
+    img:T+'/1I3oE47FZwSuQWYP02d9rSCaQpq.jpg', gr:'linear-gradient(135deg,#050a15,#0a1525)',
+    sim:['s2e1','s7e1','s5e1'] },
+
+  { id:'s6e4',s:6,e:4,y:2023, en:'Mazey Day',                     he:'יום מייזי',
+    tags:['horror','satire'], r:6, rt:36, intensity:3,
+    imdb:'tt14551916', wiki:'Mazey_Day', rtSlug:'s06/e04',
+    review:'סלב בורחת מהפפרצי לטבע — עם תפנית שחוצה גבולות, וחוות דעות חלוקות.',
+    summary:'צלמת פפרצי עוקבת אחרי סלב שנעלמה ומגלה שהסתרה שלה לא מה שחשבה. הפרק מנסה לשלב ביקורת על ציד-כשפים אחר סלבריטאים עם ז\'אנר אחר לגמרי — ולא כולם מסכימים שזה עובד. הנמוך ביותר ב-RT בסדרה.',
+    img:T+'/8v4OZ4O0P4MZu59lWqOb1BZGrB4.jpg', gr:'linear-gradient(135deg,#0f080a,#1e1012)',
+    sim:['s2e2','s6e5','s4e3'] },
+
+  { id:'s6e5',s:6,e:5,y:2023, en:'Demon 79',                      he:'שד 79',
+    tags:['horror','darkHumor'], r:8, rt:82, intensity:2,
+    imdb:'tt14551918', wiki:'Demon_79', rtSlug:'s06/e05',
+    review:'שנות ה-70, שד ומכירה בחנות. נועז ומגוחך-ברצינות — ולא מבזבז רגע.',
+    summary:'שנות ה-70 הבריטיות: מוכרת חנות ביישנית פוגשת שד שמציע לה עסקה מוזרה. הפרק נועז ומשלב קומדיה שחורה עם אימה בצורה שמרגישה כמו בלאם אחרי חצות. חוצה את גבולות Black Mirror המוכרים — ועושה זאת בביטחון.',
+    img:T+'/6lGVCSv4DfQqgjqauSxM4HmfvKS.jpg', gr:'linear-gradient(135deg,#100510,#200a20)',
+    sim:['s4e6','s2e4','s2e2'] },
+
+  // ── S7 ──────────────────────────────────────────────────────────────────────
+  { id:'s7e1',s:7,e:1,y:2025, en:'Common People',                 he:'אנשים רגילים',
+    tags:['scifi','horror','thriller'], r:8, rt:75, intensity:2,
+    imdb:'', wiki:'Common_People_(Black_Mirror)', rtSlug:'s07/e01',
+    review:'המדע מצא דרך לשמור אנשים בחיים — תמורת מחיר חודשי. על אהבה, כסף ורדיפה אחרי המשך.',
+    summary:'טכנולוגיה חדשה מאפשרת לאדם שמת "להמשיך לחיות" בשירות ענן — תמורת מחיר חודשי עולה ועולה. האב מנסה לשמור את אשתו ומגלה שגם למות יש מחיר בשוק. על אהבה, חמדנות, ועל ניצול של הכאב הכי גדול שיש.',
+    img:T+'/156V2J7yQIOKEu1EuJbYUa105rE.jpg', gr:'linear-gradient(135deg,#080808,#181818)',
+    sim:['s2e1','s6e3','s7e4'] },
+
+  { id:'s7e2',s:7,e:2,y:2025, en:'Bête Noire',                    he:'הפחד השחור',
+    tags:['horror','thriller'], r:8, rt:82, intensity:2,
+    imdb:'', wiki:'Bête_Noire_(Black_Mirror)', rtSlug:'s07/e02',
+    review:'שתי נשים, עבר כואב, ואירועים שגובלים בבלתי-מוסבר. פרק שרודף אותך גם בשעות שאחריו.',
+    summary:'מדענית מוכשרת מתחילה לחוות מציאות שממנה אי אפשר לברוח — כשהיא פוגשת עמיתה חדשה שמעוררת תחושת היכרות לא-מוסברת. מנהל שיחה עם מה שהוא לא מה שנראה שהוא עושה. מטריד ומעורפל ברמה שנדירה בסדרה.',
+    img:T+'/4HheeR47LHsfD1hsSW79QwTX1z9.jpg', gr:'linear-gradient(135deg,#0a0808,#1a1010)',
+    sim:['s2e2','s3e3','s7e6'] },
+
+  { id:'s7e3',s:7,e:3,y:2025, en:'Hotel Reverie',                 he:'מלון רברי',
+    tags:['scifi','romance'], r:7.5, rt:72, intensity:1,
+    imdb:'', wiki:'Hotel_Reverie', rtSlug:'s07/e03',
+    review:'שחקנית שצוללת לתוך סרט קלאסי — ומתאהבת בדמות שבפנים. ויזואלי ומרגש.',
+    summary:'שחקנית מפורסמת מצטרפת לפרויקט ניסיוני שמכניס אותה "לתוך" סרט קלאסי ישן — ומתאהבת בדמות שבפנים. על גבולות שבין עולמות, ועל מה שהמוח מוכן להאמין כשהלב רוצה.',
+    img:T+'/xEyXUpdl531IYPfSCCUqYYwImw.jpg', gr:'linear-gradient(135deg,#150510,#250a20)',
+    sim:['s3e4','s4e4','s7e4'] },
+
+  { id:'s7e4',s:7,e:4,y:2025, en:'Eulogy',                        he:'הספד',
+    tags:['scifi','romance'], r:7.5, rt:74, intensity:1,
+    imdb:'', wiki:'Eulogy_(Black_Mirror)', rtSlug:'s07/e04',
+    review:'AI שמחפש זיכרונות אבודים — על אהבה, אבדן, ועל מה שלא אמרנו.',
+    summary:'שירות AI מבקש מגבר לשחזר זיכרונות על אישה שמתה — כדי לייצר הספד אישי. במהלך הפגישות הוא מתמודד עם מה שלא הצליח לבטא בחיים. על מה שה-AI לא יכול לתפוס — ועל הכאב שנשאר.',
+    img:T+'/rQxN302cWUyndz9pOd7Mjr2mb98.jpg', gr:'linear-gradient(135deg,#080a10,#101520)',
+    sim:['s2e1','s7e1','s7e3'] },
+
+  { id:'s7e5',s:7,e:5,y:2025, en:'Plaything',                     he:'צעצוע',
+    tags:['scifi','horror','thriller'], r:7.5, rt:78, intensity:2,
+    imdb:'', wiki:'Plaything_(Black_Mirror)', rtSlug:'s07/e05',
+    review:'גיימר שמגלה שמשחקו המועדף מחביא בתוכו עולם ממשי — על גבול ריאליות ופנטזיה.',
+    summary:'גבר מבוגר מספר לחוקרת איך בשנות ה-90 גילה שמשחק מחשב מסוים מחביא עולם חי וממשי. הסיפור מהדהד על מחויבות ועל הגבול שבין ריאליות לפנטזיה. מי שאהב Playtest — זה לאותו מקום אבל שונה.',
+    img:T+'/j0FZRa4xHvvFS8YLekRdwgwlnOL.jpg', gr:'linear-gradient(135deg,#050510,#0a0a20)',
+    sim:['s3e2','s4e1','s6e3'] },
+
+  { id:'s7e6',s:7,e:6,y:2025, en:'Rabbit Hole',                   he:'חור הארנב',
+    tags:['thriller','horror','scifi'], r:8, rt:80, intensity:2,
+    imdb:'', wiki:'Rabbit_Hole_(Black_Mirror)', rtSlug:'s07/e06',
+    review:'עולם שבו כל מחשבה יכולה להיחטף — פרנואידי ומחשיד מהרגע הראשון.',
+    summary:'מנהל בחברת טכנולוגיה מגלה שמישהו שנמצא "בתוך המערכת" רוצה לשחרר נתונים מסוכנים. פרנואידי, מתוחכם ובלתי אמין ברמה שגורמת לך לפקפק בכל מה שאתה רואה.',
+    img:T+'/6JxoU4B1VMYf2tt8VPpNl8juKwm.jpg', gr:'linear-gradient(135deg,#0a0505,#1a0a0a)',
+    sim:['s3e6','s5e2','s4e5'] }
+];
+
+// ─── GENRES & INTENSITY FILTERS ──────────────────────────────────────────────
+const GENRES = [
+  { key:'horror',    icon:'👻', label:'אימה' },
+  { key:'scifi',     icon:'🤖', label:'מד"ב' },
+  { key:'thriller',  icon:'🔪', label:'מותחן' },
+  { key:'darkHumor', icon:'😈', label:'הומור שחור' },
+  { key:'romance',   icon:'💙', label:'רומנטיקה' },
+  { key:'satire',    icon:'🎭', label:'סאטירה' },
+];
+const INTENSITIES = [
+  { key:'i1', cls:'mild',     icon:'🌿', label:'קל לצפייה',  title:'פרקים עם פחות אימה — מתאים לכולם' },
+  { key:'i2', cls:'moderate', icon:'⚡', label:'בינוני',      title:'מאתגר אבל לא קשה מדי' },
+  { key:'i3', cls:'intense',  icon:'🔥', label:'ללב חזק',    title:'כבד, מטריד, בלתי נשכח' },
+];
+const INTENSITY_MAP = { i1:1, i2:2, i3:3 };
+
+const TAG_LABELS = {
+  horror:'👻 אימה', scifi:'🤖 מד"ב', darkHumor:'😈 הומור שחור',
+  romance:'💙 רומנטיקה', thriller:'🔪 מותחן', satire:'🎭 סאטירה',
+  future:'🔮 עתיד', anthology:'📚 אנתולוגיה'
+};
+const TAG_SHORT = {
+  horror:'אימה', scifi:'מד"ב', darkHumor:'הומור שחור',
+  romance:'רומנטיקה', thriller:'מותחן', satire:'סאטירה',
+  future:'עתיד', anthology:'אנתולוגיה'
+};
+
+// ─── STATE ────────────────────────────────────────────────────────────────────
+let ratings = {};
+let activeFilters = new Set(); // selected genre keys
+
+function load() {
+  try {
+    ratings = JSON.parse(localStorage.getItem('bm_r') || '{}');
+    const saved = JSON.parse(localStorage.getItem('bm_f') || '[]');
+    activeFilters = new Set(saved);
+  } catch(e) {}
+}
+function save() {
+  try {
+    localStorage.setItem('bm_r', JSON.stringify(ratings));
+    localStorage.setItem('bm_f', JSON.stringify([...activeFilters]));
+  } catch(e) {}
+}
+
+// ─── HELPERS ─────────────────────────────────────────────────────────────────
+function stars(r) {
+  const f = Math.floor(r / 2), h = (r % 2 >= 1) ? 1 : 0, e = 5 - f - h;
+  return '★'.repeat(f) + (h ? '½' : '') + '☆'.repeat(e);
+}
+function seasonLabel(ep) {
+  return ep.special || ('עונה ' + ep.s + ' · פרק ' + ep.e);
+}
+function rtLabel(n)  { return (n >= 60 ? '🍅 ' : '🥀 ') + n + '%'; }
+function rtClass(n)  { return n >= 60 ? 'fresh' : 'rotten'; }
+
+// ─── RECOMMENDATION ENGINE ────────────────────────────────────────────────────
+function tagWeights() {
+  const w = {};
+  EPISODES.forEach(ep => {
+    const rat = ratings[ep.id];
+    if (!rat) return;
+    const mul = rat === 'loved' ? 2.2 : rat === 'liked' ? 1.4 : rat === 'disliked' ? -0.8 : 0;
+    ep.tags.forEach(t => { w[t] = (w[t] || 0) + mul; });
+  });
+  return w;
+}
+function scoreEp(ep, w) {
+  return ep.tags.reduce((s, t) => s + (w[t] || 0), 0);
+}
+function getFiltered() {
+  const w = tagWeights();
+  const genreFilters     = [...activeFilters].filter(f => !f.startsWith('i'));
+  const intensityFilters = [...activeFilters].filter(f => f.startsWith('i'));
+  return EPISODES
+    .filter(ep => {
+      if (ratings[ep.id]) return false;
+      if (genreFilters.length > 0 && !ep.tags.some(t => genreFilters.includes(t))) return false;
+      if (intensityFilters.length > 0) {
+        const need = intensityFilters.map(k => INTENSITY_MAP[k]).filter(Boolean);
+        if (!need.includes(ep.intensity)) return false;
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      const d = scoreEp(b, w) - scoreEp(a, w);
+      return d !== 0 ? d : b.r - a.r;
+    });
+}
+
+// ─── USER PROFILE ────────────────────────────────────────────────────────────
+function buildProfile() {
+  const p = { genreScore:{}, ratedCount:0, intensitySum:0, intensityN:0,
+              likesAnthology:false, topGenres:[], weakGenres:[] };
+  EPISODES.forEach(ep => {
+    const rat = ratings[ep.id];
+    if (!rat) return;
+    p.ratedCount++;
+    const mul = rat==='loved'?2.2 : rat==='liked'?1.4 : rat==='disliked'?-0.8 : 0;
+    ep.tags.forEach(t => { p.genreScore[t] = (p.genreScore[t]||0) + mul; });
+    if (ep.intensity && mul !== 0) { p.intensitySum += ep.intensity*mul; p.intensityN += Math.abs(mul); }
+    if (ep.tags.includes('anthology') && (rat==='liked'||rat==='loved')) p.likesAnthology = true;
+  });
+  p.topGenres  = Object.entries(p.genreScore).filter(([,v])=>v>0).sort(([,a],[,b])=>b-a).map(([k])=>k);
+  p.weakGenres = Object.entries(p.genreScore).filter(([,v])=>v<0).sort(([,a],[,b])=>a-b).map(([k])=>k);
+  p.prefersIntensity = p.intensityN > 0 ? p.intensitySum / p.intensityN : 0;
+  // dominant tag: genre that appears most in loved episodes
+  const lovedTags = {};
+  EPISODES.filter(e=>ratings[e.id]==='loved').forEach(e=>e.tags.forEach(t=>{ lovedTags[t]=(lovedTags[t]||0)+1; }));
+  p.lovedTags = Object.entries(lovedTags).sort(([,a],[,b])=>b-a).map(([k])=>k);
+  return p;
+}
+
+// ─── MATCH PILL ──────────────────────────────────────────────────────────────
+function matchPill(ep, w) {
+  if (Object.keys(ratings).length < 3) return null;
+  const unrated = EPISODES.filter(e => !ratings[e.id]);
+  if (unrated.length < 3) return null;
+  const sorted = unrated.map(e => scoreEp(e, w)).sort((a, b) => b - a);
+  const epScore = scoreEp(ep, w);
+  const rank = sorted.findIndex(s => s <= epScore);
+  const pct = rank < 0 ? 1 : rank / sorted.length;
+  if (pct < 0.15) return { cls:'high', text:'מתאים מאוד לך 🎯' };
+  if (pct < 0.42) return { cls:'med',  text:'מתאים לך ✓' };
+  if (pct >= 0.80) return { cls:'warn', text:'אולי לא בשבילך' };
+  return null;
+}
+
+// ─── PERSONALIZED BLURBS ─────────────────────────────────────────────────────
+function getBlurb(ep, w) {
+  const p = buildProfile();
+  if (p.ratedCount < 1) return null;
+
+  // 1. loved a similar episode → most powerful signal
+  const lovedSim = (ep.sim||[]).find(id => ratings[id]==='loved');
+  if (lovedSim) {
+    const ref = EPISODES.find(e=>e.id===lovedSim);
+    if (ref) return { type:'pos', text:'ממש אהבת את "'+ref.he+'" — הפרק הזה נוגע באותם מיתרים' };
+  }
+
+  // 2. anthology fan
+  if (ep.tags.includes('anthology') && p.likesAnthology)
+    return { type:'pos', text:'שמתי לב שאתה/את אוהב/ת פרקים שמספרים כמה סיפורים — פה בדיוק זה קורה' };
+
+  // 3. liked a similar episode
+  const likedSim = (ep.sim||[]).find(id => ratings[id]==='liked');
+  if (likedSim) {
+    const ref = EPISODES.find(e=>e.id===likedSim);
+    if (ref) return { type:'pos', text:'אם אהבת את "'+ref.he+'" — זה בדיוק אותו DNA' };
+  }
+
+  // 4. top loved tag appears here
+  if (p.lovedTags.length && ep.tags.includes(p.lovedTags[0])) {
+    const lbl = TAG_SHORT[p.lovedTags[0]] || p.lovedTags[0];
+    return { type:'pos', text:'הפרקים שהכי אהבת היו '+lbl+' — וזה אחד הטובים בקטגוריה' };
+  }
+
+  // 5. intensity mismatch
+  if (ep.intensity===3 && p.prefersIntensity < 1.2 && p.ratedCount >= 3)
+    return { type:'warn', text:'הפרקים שאהבת היו עדינים יותר — זה כבד ומאתגר' };
+  if (ep.intensity===1 && p.prefersIntensity > 2.2 && p.ratedCount >= 3)
+    return { type:'warn', text:'אתה/את אוהב/ת פרקים עצימים — זה קליל יחסית' };
+
+  // 6. disliked similar → warning
+  const dislikedSim = (ep.sim||[]).find(id => ratings[id]==='disliked');
+  if (dislikedSim) {
+    const ref = EPISODES.find(e=>e.id===dislikedSim);
+    if (ref) {
+      const shared = ep.tags.filter(t=>ref.tags.includes(t)).map(t=>TAG_SHORT[t]).filter(Boolean);
+      if (shared.length) return { type:'warn', text:'דומה ל"'+ref.he+'" שלא אהבת ('+shared.join(', ')+')' };
+    }
+  }
+
+  // 7. weak genre
+  if (p.weakGenres.length) {
+    const weakMatch = ep.tags.find(t=>t===p.weakGenres[0]);
+    if (weakMatch) {
+      const lbl = TAG_SHORT[weakMatch] || weakMatch;
+      return { type:'warn', text:'שמתי לב שבדרך כלל '+lbl+' פחות מתאים לך — שקול/י' };
+    }
+  }
+
+  // 8. top tag match from weights
+  const topTag = ep.tags.find(t => (w[t]||0) >= 1.8);
+  if (topTag) return { type:'pos', text:'בדיוק הסגנון שלך — '+(TAG_SHORT[topTag]||topTag)+' חזק כאן' };
+
+  // 9. RT 100 badge
+  if (ep.rt===100) return { type:'pos', text:'100% ב-Rotten Tomatoes — מהמשובחים שבסדרה' };
+
+  return null;
+}
+
+// ─── UI HELPERS ───────────────────────────────────────────────────────────────
+function updateStats() {
+  const liked = EPISODES.filter(e => ratings[e.id] === 'liked' || ratings[e.id] === 'loved').length;
+  const done  = Object.keys(ratings).length;
+  const lcEl = document.getElementById('like-count');
+  const dcEl = document.getElementById('done-count');
+  const tcEl = document.getElementById('total-count');
+  if (lcEl) lcEl.textContent = liked;
+  if (dcEl) dcEl.textContent = done;
+  if (tcEl) tcEl.textContent = EPISODES.length;
+}
+
+// ─── FILTER CHIPS ────────────────────────────────────────────────────────────
+function buildFilters() {
+  const genreRow     = document.getElementById('fb-genre-row');
+  const intensityRow = document.getElementById('fb-intensity-row');
+  // Rebuild genre chips (keep the .fb-app-title)
+  genreRow.querySelectorAll('.fchip').forEach(c => c.remove());
+  GENRES.forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = 'fchip' + (activeFilters.has(g.key) ? ' on' : '');
+    btn.innerHTML = '<span class="fi">' + g.icon + '</span>' + g.label;
+    btn.onclick = () => toggleFilter(g.key);
+    genreRow.appendChild(btn);
+  });
+  // Rebuild intensity chips (keep fb-meta at the end)
+  const meta = intensityRow.querySelector('.fb-meta');
+  intensityRow.innerHTML = '';
+  INTENSITIES.forEach(d => {
+    const btn = document.createElement('button');
+    btn.className = 'fchip ' + d.cls + (activeFilters.has(d.key) ? ' on' : '');
+    btn.title = d.title;
+    btn.innerHTML = '<span class="fi">' + d.icon + '</span>' + d.label;
+    btn.onclick = () => toggleFilter(d.key);
+    intensityRow.appendChild(btn);
+  });
+  intensityRow.appendChild(meta);
+}
+function toggleFilter(key) {
+  if (activeFilters.has(key)) activeFilters.delete(key);
+  else activeFilters.add(key);
+  save(); buildFilters(); renderDeck();
+}
+function resetAll() {
+  if (!confirm('לאפס את כל הדירוגים וסינוני הז\'אנר?')) return;
+  ratings = {}; activeFilters = new Set(); save();
+  buildFilters(); updateStats(); renderDeck();
+}
+
+// ─── CARD HTML ────────────────────────────────────────────────────────────────
+function cardHtml(ep) {
+  const w     = tagWeights();
+  const tags  = ep.tags.map(t => '<span class="tag tag-' + t + '">' + (TAG_LABELS[t] || t) + '</span>').join('');
+  const rtCls = rtClass(ep.rt);
+  const blurb = getBlurb(ep, w);
+  const pill  = matchPill(ep, w);
+
+  const pillHtml = pill
+    ? '<span class="match-pill ' + pill.cls + '">' + pill.text + '</span>'
+    : '';
+
+  const blurbHtml = blurb
+    ? '<div class="back-blurb ' + (blurb.type === 'warn' ? 'warn' : 'pos') + '">' + blurb.text + '</div>'
+    : '';
+
+  const imdbHref = ep.imdb
+    ? IMDB_B + ep.imdb + '/'
+    : 'https://www.imdb.com/title/tt2085059/episodes?season=' + ep.s;
+
+  const links =
+    '<a class="back-link" href="' + heSearch(ep) + '" target="_blank" rel="noopener"><span class="bl-icon">📰</span>ביקורת בעברית</a>' +
+    '<a class="back-link" href="' + RT_B + ep.rtSlug + '" target="_blank" rel="noopener"><span class="bl-icon">🍅</span>דירוג מבקרים</a>' +
+    '<a class="back-link" href="' + imdbHref + '" target="_blank" rel="noopener"><span class="bl-icon">🎬</span>עמוד הפרק</a>' +
+    '<a class="back-link" href="' + WIKI_B + ep.wiki + '" target="_blank" rel="noopener"><span class="bl-icon">📖</span>ויקיפדיה</a>';
+
+  return '<div class="ep-card" data-id="' + ep.id + '">' +
+    '<div class="swipe-ov" id="so-' + ep.id + '">' +
+      '<div class="swipe-lbl like"    id="sl-l-' + ep.id + '">אהבתי ❤</div>' +
+      '<div class="swipe-lbl dislike" id="sl-d-' + ep.id + '" style="display:none">לא אהבתי ✕</div>' +
+    '</div>' +
+    '<div class="flip-inner" id="fi-' + ep.id + '">' +
+      // ── FRONT ──
+      '<div class="flip-f">' +
+        '<div class="card-img-wrap">' +
+          '<img class="card-img" src="' + ep.img + '"' +
+               ' onerror="this.style.display=\'none\';this.nextElementSibling.style.display=\'flex\';" alt="' + ep.en + '">' +
+          '<div class="card-img-fb" style="background:' + ep.gr + '">⬛</div>' +
+          '<div class="card-img-overlay"></div>' +
+        '</div>' +
+        '<div class="card-body">' +
+          '<div>' +
+            '<div class="card-row1">' +
+              '<span class="c-badge">' + seasonLabel(ep) + '</span>' +
+              '<span class="c-rt ' + rtCls + '">' + rtLabel(ep.rt) + '</span>' +
+            '</div>' +
+            '<div class="c-title-row">' +
+              '<span class="c-title-he-p">' + ep.he + '</span>' +
+              '<span class="c-title-sep">/</span>' +
+              '<span class="c-title-en-p">' + ep.en + '</span>' +
+            '</div>' +
+          '</div>' +
+          '<div>' +
+            '<div class="c-bottom">' +
+              '<span class="c-stars">' + stars(ep.r) + '</span>' +
+              '<span class="c-rnum">' + ep.r + '/10</span>' +
+              pillHtml +
+            '</div>' +
+            '<div class="c-tags">' + tags + '</div>' +
+          '</div>' +
+          '<div class="flip-hint">הקש לפרטים · גרור לדירוג</div>' +
+        '</div>' +
+      '</div>' +
+      // ── BACK ──
+      '<div class="flip-b">' +
+        '<div class="back-season">' + seasonLabel(ep) + ' · ' + ep.y + '</div>' +
+        '<div class="back-title-en">' + ep.en + '</div>' +
+        '<div class="back-title-he">' + ep.he + '</div>' +
+        '<div class="back-rt-row">' +
+          '<span class="back-stars">' + stars(ep.r) + '</span>' +
+          '<span class="back-rnum">' + ep.r + '/10</span>' +
+          '<div class="back-divider"></div>' +
+          '<span class="back-rt-badge ' + rtCls + '">' + rtLabel(ep.rt) + '</span>' +
+        '</div>' +
+        '<div class="back-summary">' + ep.summary + '</div>' +
+        blurbHtml +
+        '<div class="back-links">' + links + '</div>' +
+      '</div>' +
+    '</div>' +
+  '</div>';
+}
+
+// ─── RENDER DECK ──────────────────────────────────────────────────────────────
+function renderDeck() {
+  const stack = document.getElementById('card-stack');
+  const acts  = document.getElementById('act-btns');
+  const hint  = document.querySelector('.act-hint');
+  const done  = document.getElementById('deck-done');
+  const deck  = getFiltered();
+
+  if (!deck.length) {
+    stack.innerHTML = ''; acts.style.display = 'none';
+    if (hint) hint.style.display = 'none';
+    done.style.display = 'flex';
+    const msg = document.getElementById('done-msg');
+    if (msg) {
+      msg.textContent = activeFilters.size
+        ? 'כל הפרקים בסינון הנוכחי דורגו. נסה/י לשנות את הסינון, או לאפס הכל.'
+        : 'דרגת את כל הפרקים. אפשר לאפס ולהתחיל מחדש.';
+    }
+    return;
+  }
+  acts.style.display = 'flex';
+  if (hint) hint.style.display = 'flex';
+  done.style.display = 'none';
+  stack.innerHTML = deck.slice(0, 3).map(ep => cardHtml(ep)).join('');
+  attachDrag(stack.querySelector('.ep-card'));
+  updateStats();
+}
+
+// ─── DRAG / SWIPE ─────────────────────────────────────────────────────────────
+let drag = null;
+
+function attachDrag(card) { if (card) card.addEventListener('pointerdown', onDown); }
+
+function onDown(e) {
+  if (e.target.closest('a')) return;
+  drag = { card:e.currentTarget, x0:e.clientX, y0:e.clientY, dx:0, dy:0 };
+  drag.card.classList.add('dragging');
+  drag.card.setPointerCapture(e.pointerId);
+  drag.card.addEventListener('pointermove', onMove);
+  drag.card.addEventListener('pointerup',   onUp);
+  drag.card.addEventListener('pointercancel', onCancel);
+}
+
+function onMove(e) {
+  if (!drag) return;
+  drag.dx = e.clientX - drag.x0;
+  drag.dy = e.clientY - drag.y0;
+  const rot = drag.dx * .065;
+  drag.card.style.transform = 'translate(' + drag.dx + 'px,' + (drag.dy * .22) + 'px) rotate(' + rot + 'deg)';
+  const ov   = drag.card.querySelector('.swipe-ov');
+  const lEl  = drag.card.querySelector('.swipe-lbl.like');
+  const dEl  = drag.card.querySelector('.swipe-lbl.dislike');
+  const op   = Math.min(Math.abs(drag.dx) / 85, 1);
+  if (drag.dx > 12) {
+    ov.style.opacity = op; ov.style.background = 'rgba(40,180,80,' + (op * .32) + ')';
+    lEl.style.display = 'block'; dEl.style.display = 'none';
+  } else if (drag.dx < -12) {
+    ov.style.opacity = op; ov.style.background = 'rgba(220,40,40,' + (op * .32) + ')';
+    dEl.style.display = 'block'; lEl.style.display = 'none';
+  } else { ov.style.opacity = 0; }
+}
+
+function onUp(e) {
+  if (!drag) return;
+  const { card, dx, dy } = drag;
+  card.classList.remove('dragging');
+  card.removeEventListener('pointermove', onMove);
+  card.removeEventListener('pointerup',   onUp);
+  card.removeEventListener('pointercancel', onCancel);
+
+  // Tap → flip
+  if (Math.abs(dx) < 8 && Math.abs(dy) < 8) {
+    card.querySelector('.flip-inner')?.classList.toggle('flipped');
+    drag = null; return;
+  }
+
+  const THRESH = 95;
+  if      (dx >  THRESH) commit(card.dataset.id, 'liked',    'fly-r');
+  else if (dx < -THRESH) commit(card.dataset.id, 'disliked', 'fly-l');
+  else {
+    card.classList.add('spring'); card.style.transform = '';
+    card.querySelector('.swipe-ov').style.opacity = 0;
+    setTimeout(() => card.classList.remove('spring'), 450);
+  }
+  drag = null;
+}
+
+function onCancel() {
+  if (!drag) return;
+  drag.card.classList.remove('dragging'); drag.card.style.transform = ''; drag = null;
+}
+
+function commit(id, status, flyClass) {
+  const card = document.querySelector('[data-id="' + id + '"]');
+  if (!card) return;
+  card.classList.add(flyClass);
+  setTimeout(() => { ratings[id] = status; save(); updateStats(); renderDeck(); }, 340);
+}
+
+function rateTop(status) {
+  const deck = getFiltered();
+  if (!deck.length) return;
+  const ep = deck[0];
+  const fly = status === 'disliked' ? 'fly-l' : status === 'loved' ? 'fly-u' : 'fly-r';
+
+  // If marking "unseen" and it's actually a strong match → show toast
+  if (status === 'unseen' && Object.keys(ratings).length >= 3) {
+    const w = tagWeights();
+    const unrated = EPISODES.filter(e => !ratings[e.id]);
+    if (unrated.length >= 3) {
+      const sorted = unrated.map(e => scoreEp(e, w)).sort((a, b) => b - a);
+      const epScore = scoreEp(ep, w);
+      const rank = sorted.findIndex(s => s <= epScore);
+      const pct = rank < 0 ? 1 : rank / sorted.length;
+      if (pct < 0.25) {
+        const blurb = getBlurb(ep, w);
+        const reason = blurb ? blurb.text : (ep.rt === 100 ? '100% ב-Rotten Tomatoes — מהמשובחים שבסדרה' : 'מתאים לטעם שלך לפי מה שדרגת עד כה');
+        showToast('שמתי לב — "' + ep.he + '" מתאים לך!', reason);
+      }
+    }
+  }
+
+  commit(ep.id, status, fly);
+}
+
+// ─── TOAST ────────────────────────────────────────────────────────────────────
+let toastTimer = null;
+function showToast(title, body) {
+  const el = document.getElementById('toast');
+  document.getElementById('toast-title').textContent = title;
+  document.getElementById('toast-body').textContent  = body;
+  el.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(hideToast, 5500);
+}
+function hideToast() {
+  document.getElementById('toast').classList.remove('show');
+}
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init() {
+  load();
+  // Apply saved theme (theme toggling is handled by the parent frame)
+  try {
+    if (localStorage.getItem('bm_theme') === 'light') {
+      document.documentElement.dataset.theme = 'light';
+    }
+  } catch(e) {}
+  // Sync theme from parent iframe via postMessage
+  window.addEventListener('message', ev => {
+    if (ev.data && ev.data.type === 'bm-theme') {
+      document.documentElement.dataset.theme = ev.data.light ? 'light' : '';
+      try { localStorage.setItem('bm_theme', ev.data.light ? 'light' : 'dark'); } catch(e) {}
+    }
+  });
+  buildFilters();
+  renderDeck();
+  updateStats();
+}
+
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
